@@ -1,198 +1,126 @@
 \documentclass{bioinfo}
-\copyrightyear{2003}
-\pubyear{2003}
-
+\copyrightyear{2006}
+\pubyear{2006}
 
 \begin{document}
 \firstpage{1}
 
 \title[short Title]{Quadratic Assignment and the Layout of Oligonucleotide Microarrays}
-\author[Sample \textit{et~al}]{Author\,$^{\rm a}$, Author\,$^{\rm b}$}
-\address{$^{\rm a}$Address followed, $^{\rm b}$Address followed}
+\author[Sample \textit{et~al}]{S\'ergio A. de Carvalho Jr.\,$^{\rm a}$ and Sven Rahmann\,$^{\rm b}$}
+\address{$^{\rm a}$Graduiertenkolleg Bioinformatik, Bielefeld University, Germany,\\$^{\rm b}$Algorithms and Statistics for Systems Biology, Genome Informatics, Bielefeld University, Germany.}
 \maketitle
 
 \begin{abstract}
 
 \section{Motivation:}
-Text Text Text  Text Text Text Text Text Text Text Text
-Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text.
-
+The production of commercial DNA microarrays is based on a light-directed chemical synthesis driven by a set of masks or micromirror arrays. Due to the natural properties of light and the ever shrinking feature sizes, the arrangement of the probes on the chip and the order in which their nucleotides are synthesized play an important role on the quality of the final product. In this paper, we review existing models and algorithms for designing high-density oligonucleotide microarrays. We also propose new models and investigate a new approach based on the \emph{quadratic assignment problem} (QAP).
 \section{Results:}
-Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text
-
+We used an existing QAP heuristic algorithm to design the layout of small artificial microarrays with excellent results. We compare this approach with the best known algorithm and describe how it can be combined with other existing algorithms to design the latest million-probe chips.
 \section{Availability:}
-Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text 
-
-\section{Contact:} \href{name@bio.com}{name@bio.com}
+Source code is available from the authors upon request.
+\section{Contact:} \href{Sergio.Carvalho@cebitec.uni-bielefeld.de}{Sergio.Carvalho@cebitec.uni-bielefeld.de}
 \end{abstract}
 
 \section{Introduction}
 
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure~\ref{fig:01} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citep{Bag01} wants to know about …… text follows.
+An oligonucleotide microarray is a piece of glass or plastic on which single-stranded fragments of DNA, called \emph{probes}, are affixed or synthesized. The chips produced by Affymetrix are considered the industry standard. They can contain more than one million spots (or \emph{features}) as small as 11 $\mu$m, with each spot accommodating several million copies of a probe. Probes are typically 25 nucleotides long and are synthesized in parallel, on the chip, in a series of repetitive steps. Each step appends the same nucleotide to probes of selected regions of the chip. Selection occurs by exposure to light with the help of a photolithographic mask that allows or obstructs the passage of light accordingly \citep{FODOR91}.
 
-\begin{equation} 
-\sum x+ y =Z\label{eq:01}
+Formally, we have a set of probes $\mathcal{P} = \{p_{1}, p_{2}, ... p_{n}\}$ that are produced by a series of masks $\mathcal{M} = (m_{1}, m_{2}, ... m_{\mu})$, where each mask $m_{i}$ induces the addition of a particular nucleotide $\nu_{i} \in \{A, C, G, T\}$ to a subset of $\mathcal{P}$. The \emph{nucleotide deposition sequence} $\mathcal{S} = \nu_{1} \nu_{2} \ldots \nu_{\mu}$ corresponding to the sequence of nucleotides added at each masking step is therefore a supersequence of all $p_{i} \in \mathcal{P}$. In general, a probe can be \emph{embedded} within $\mathcal{S}$ in several ways. An embedding of $p_{j}$ is a $\mu$-tuple $\varepsilon = (e_{j,1}, e_{j,2}, ... e_{j,\mu})$ in which $e_{j,i} = 1$ if probe $p_{j}$ receives nucleotide $\nu_{i}$ (at step $i$), or 0 otherwise (Figure~\ref{fig:01}).
+
+\begin{figure}
+% add figure
+\caption{Synthesis of a hypothetical 2x2 chip. a) Chip layout and 2-base-long probe sequences; b) deposition sequence and probe embeddings; c) resulting photolithographic masks.}\label{fig:01}
+\end{figure}
+
+Due to diffraction of light or internal reflection, untargeted spots can sometimes be accidentally activated in a certain masking step, producing unpredicted probes that can compromise the results of an experiment. This issue was described by \citealp{FODOR91} who noted that the problem is more likely to occur near the borders between masked and unmasked spots. This observation has given rise to the term \emph{border conflict}.
+
+We are interested in finding an arrangement of the probes on the chip together with their embeddings in such a way that we minimize the chances of unintended illumination during mask exposure steps. As we show in later sections, this problem is intrinsically hard and optimal solutions are unlikely to be found even for very small chips and fixed embeddings due to the exponential number of possible arrangements.
+
+If we consider all valid embeddings, the problem is even harder. A typical probe on an Affymetrix chip, for instance, can have up to several million possible embeddings. For this reason, the problem has been traditionally tackled in two steps. First, given a fixed embedding of the probes, a \emph{placement} is computed in an attempt to reduce border conflicts. Then, a \emph{post-placement} optimization phase re-embeds the probes considering its location on the chip, in such a way that the conflicts with the neighboring spots are further reduced.
+
+In the next section, we review the Border Length Minimization Problem introduced by \citealp{HANNENHALLI02}, and define an extended model for evaluating microarray layouts. In section 3 we briefly review exising placement strategies. In section 4 we propose a new approach to the problem based on a quadratic assignment problem (QAP) formulation. We present the results of using a QAP heuritic algorithm to design small artificial chips in section 5, along with a comparison with the best known placement algorithm. In section 6 we describe how this approach can be used to design larger microarrays.
+
+\section{Modeling}
+
+The problem of unintended illumination in the production of microarrays was first formally addressed by \citealp{FELDMAN93}, but they only considered \emph{uniform arrays}, arrays containing all possible probes of a given length).
+
+\citealp{HANNENHALLI02} were the first to work with \emph{assay} arrays with arbitrary probes. They formulated the Border Length Minimization Problem, which aims at finding an arrangement of the probes together with their embeddings that minimizes the number of border conflicts during mask exposure steps.
+
+Given a mask $\mu_{i}$ we compute its border length as the number of borders shared by masked (unproductive) and unmasked (productive) spots. The total border length of a given arrangement is the sum of border lengths over all masks.
+
+\subsection{Conflict Index}
+
+\citep{KAHNG03_1} noted that the definition of border length did not take into account two simple yet important practical considerations: a) stray light might activate not only immediate neighbors but also probes that lie as far as three cells away from the targeted spot; and b) imperfections produced in the middle of a probe are more harmful than in its extremities. With these observations in mind, we define the conflict index $\kappa(s)$ of a spot $s$ whose probes of length~$\ell_{s}$ are synthesized in $\mu$~masking steps as follows. First we define a distance-dependent weighting function, $\delta(s,s',i)$, that accounts for observation a) above:
+
+\begin{equation}
+\label{eq:dist_weight} \delta(s,s',i) :=
+        \left\{
+                \begin{array}{ll}
+                        0 & \mbox{if spot $s'$ is masked at step $i$}, \\
+                        \frac{1}{(d(s,s'))^{2}} & \mbox{otherwise}, \\
+                \end{array}
+        \right.
 \end{equation}
+%%
+where $d(s,s')$ is the Euclidian distance between spots $s$ and $s'$. We also use position-dependent weights as suggested in \citealp{KAHNG03_1} to account for observation b):
+%%
+\begin{equation}
+\label{eq:pos_mult} \omega(s,i) :=
+        \left\{
+                \begin{array}{ll}
+                        0 & \mbox{if spot $s$ is unmasked at step $i$}, \\
+                        1 + \log{\min(b_{s,i} + 1,\ell_{s} - b_{s,i} + 1)} & \mbox{otherwise}, \\
+                \end{array}
+        \right.
+\end{equation}
+%%
+where $b_{s,i}$ denotes the number of nucleotides synthesized at spot $s$ up to and including step $i$.
 
+TODO: review this definition (use of exp?).
 
+We now define the conflict index of a spot $s$ as
 
+\begin{equation}
+\label{eq:conf_idx} \kappa(s) := \sum_{i=1}^{\mu} \left( \omega(s,i) \sum_{s'} \delta(s,s',i) \right),
+\end{equation}
+%%
+where $s'$ ranges over all spots near $s$ (in practice, only those inside a 7x7 grid centered in $s$).
 
+It should be clear that our definition of conflict index is intimately connected to that of border length although the first estimates the risk of producing faulty probes in a given spot while the latter measures the quality of a mask.
 
+TODO: elaborate a bit more about the relation between border length and conflict index. Explain how the choice of position-dependent or distance weighting function can influence the border lenght when trying to reduce the conflict index. Also, mention that \citealp{KAHNG03_1} suggested to use square root for the position-dependent and that we decided to use an exponential relation.
 
-\section{Approach}
+\section{Previous Work}
 
-Equation~(\ref{eq:01}) Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text ……
+TODO: literature review.
 
+TODO: placement, embedding, partitioning.
 
+TODO: state of the art (best algorithms). Partitioning is a good idea (reduce problem size).
 
-\section{Approach}
+\section{Quadratic Assignment Formulation}
 
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
+TODO: QAP problem, probe placement as a QAP formulation, GRASP.
 
-\begin{itemize}
-\item for bulleted list, use itemize
-\item for bulleted list, use itemize
-\item for bulleted list, use itemize
-\end{itemize}
+\section{Results}
 
-
-
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-
-
-
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-%     please remove the " % " symbol from \centerline{\includegraphics{fig01.eps}}
-%     as it may ignore the figures.   
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-\begin{figure}%figure1
-%\centerline{\includegraphics{fig01.eps}}
-\caption{Caption, caption.}\label{fig:01}
-\end{figure}
-
-\begin{figure}%figure2
-%\centerline{\includegraphics{fig02.eps}}
-\caption{Caption, caption.}\label{fig:02}
-\end{figure}
-
-
-
-
-
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-
-
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-
-
-
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-
-
-
-
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-
+TODO: show results on small artificial chips.
 
 \section{Discussion}
 
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-Text Text Text Text Text Text  Text Text Text Text.
-
-Table~\ref{Tab:01} shows that Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-
-
-\section{Conclusion}
-
-(Table~\ref{Tab:01}) Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-
-
-
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-
-
-
-\begin{table}[t]
-\processtable{This is table caption\label{Tab:01}}
-{\begin{tabular}{llll}\toprule
-head1 & head2 & head3 & head4\\\midrule
-row1 & row1 & row1 & row1\\
-row2 & row2 & row2 & row2\\
-row3 & row3 & row3 & row3\\
-row4 & row4 & row4 & row4\\\botrule
-\end{tabular}}{This is a footnote}
-\end{table}
-
-
-\begin{enumerate}
-\item this is item, use enumerate 
-\item this is item, use enumerate 
-\item this is item, use enumerate 
-\end{enumerate}
-
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-
-
-
-
-
-
-Text Text Text Text Text Text  Text Text Text Text Text Text Text Text Text  Text Text Text Text Text Text. Figure \ref{fig:02} shows that the above method  Text Text Text Text  
-
-
-
-\section*{Acknowledgement}
-Text Text Text Text Text Text  Text Text.  \citealp{Boffelli03} might want to know about  text text text text
-
-
-
-
-
-
+TODO: extrapolate to larger chips, argue that GRASP is good as a final placer and should be combined with a partitioning algorithm; it may also be used as an optimization algorithm if modified to take into account the border problem.
 
 \begin{thebibliography}{}
-\bibitem[Bofelli {\it et~al}., 2000]{Boffelli03} Bofelli,F., Name2, Name3 (2003) Article title, {\it Journal Name}, {\bf 199}, 133-154.
 
-\bibitem[Bag {\it et~al}., 2001]{Bag01} Bag,M., Name2, Name3 (2001) Article title, {\it Journal Name}, {\bf 99}, 33-54.
+\bibitem[Fodor {\it et~al}., 1991]{FODOR91} Fodor, S., Read, J., Pirrung, M., Stryer, L., Lu, A., Solas, D. (1991) Light-directed, spatially addressable parallel chemical synthesis, {\it Science}, {\bf 251}, 767--73.
+
+\bibitem[Feldman {\it et~al}, 1994]{FELDMAN93} Feldman, W., Pevzner, P. (1994) Gray code masks for sequencing by hibridization, {\it Genomics}, {\bf 23}, 233--235.
+
+\bibitem[Hannenhalli {\it et~al}, 2002]{HANNENHALLI02} Hannenhalli, S., Hubell, E., Lipshutz, R., Pevzner, P. (2002) Combinatorial algorithms for design of DNA arrays, {\it Adv. Biochem. Eng. Biotechnol.}, {\bf 77}, 1--19.
+
+\bibitem[Kahng {\it et~al}, 2003-1]{KAHNG03_1} Kahng, A. B., Mandoiu, I., Pevzner, P., Reda, S., Zelikovsky, A. (2003-1) Engineering a scalable placement heuristic for DNA probe arrays, {\it Proc. of the Seventh Annual Int. Conf. on Computational Molecular Biology}, 148--83.
+
+\bibitem[Kahng {\it et~al}, 2003-2]{KAHNG03_2} Kahng, A. B., Mandoiu, I., Reda, S., Xu, X., Zelikovsky, A. (2003-2), Evaluation of placement techniques for DNA probe array layout, {\it Proc. of the IEEE/ACM Int. Conf. on Computer-Aided Design}, 262--269.
 
 \end{thebibliography}
 \end{document}
-
-
-
-
