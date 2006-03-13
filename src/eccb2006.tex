@@ -15,7 +15,7 @@
 \section{Motivation:}
 The production of commercial DNA microarrays is based on a light-directed chemical synthesis driven by a set of masks or micromirror arrays. Due to the natural properties of light and the ever shrinking feature sizes, the arrangement of the probes on the chip and the order in which their nucleotides are synthesized play an important role on the quality of the final product. In this paper, we review existing models and algorithms for designing high-density oligonucleotide microarrays. We also define an extended model to evaluate microarray layouts and investigate a new approach based on the \emph{quadratic assignment problem} (QAP).
 \section{Results:}
-We used an existing QAP heuristic algorithm to design the layout of small artificial microarrays with excellent results. We compare this approach with the best known algorithm and describe how it can be combined with other existing algorithms to design the latest million-probe chips.
+We used an existing QAP heuristic algorithm to design the layout of small artificial microarrays with promising results. We compare this approach with the best known algorithm and describe how it can be combined with other existing algorithms to design the latest million-probe chips.
 \section{Availability:}
 Source code is available from the authors upon request.
 \section{Contact:} \href{Sergio.Carvalho@cebitec.uni-bielefeld.de}{Sergio.Carvalho@cebitec.uni-bielefeld.de}
@@ -25,20 +25,21 @@ Source code is available from the authors upon request.
 
 An oligonucleotide microarray is a piece of glass or plastic on which single-stranded fragments of DNA, called \emph{probes}, are affixed or synthesized. The chips produced by Affymetrix, for instance, can contain more than one million spots (or \emph{features}) as small as 11 $\mu$m, with each spot accommodating several million copies of a probe. Probes are typically 25 nucleotides long and are synthesized in parallel, on the chip, in a series of repetitive steps. Each step appends the same nucleotide to probes of selected regions of the chip. Selection occurs by exposure to light with the help of a photolithographic mask that allows or obstructs the passage of light accordingly \citep{FODOR91}.
 
-Formally, we have a set of probes $\mathcal{P} = \{p_{1}, p_{2}, ... p_{n}\}$ that are produced by a series of masks $\mathcal{M} = (m_{1}, m_{2}, ... m_{\mu})$, where each mask $m_{i}$ induces the addition of a particular nucleotide $\nu_{i} \in \alpha = \{A, C, G, T\}$ to a subset of $\mathcal{P}$. The \emph{nucleotide deposition sequence} $\mathcal{S} = \nu_{1} \nu_{2} \ldots \nu_{\mu}$ corresponding to the sequence of nucleotides added at each masking step is therefore a supersequence of all $p_{i} \in \mathcal{P}$. In general, a probe can be \emph{embedded} within $\mathcal{S}$ in several ways. An embedding of $p_{j}$ is a $\mu$-tuple $\varepsilon = (e_{j,1}, e_{j,2}, ... e_{j,\mu})$ in which $e_{j,i} = 1$ if probe $p_{j}$ receives nucleotide $\nu_{i}$ (at step $i$), or 0 otherwise (Figure~\ref{fig:01}).
-
-Deposition sequences are usually cyclical, that is $\mathcal{S}$ is a repeated permutation of $\alpha$. This is mainly because such sequences maximize the number of possible subsequences \citep{CHASE76}. In this context, we can distinguish between \emph{synchronous} and \emph{assynchronous} embeddings. In the first case, each probe synthesize one and only one nucleotide in every cycle of the deposition sequence. Thus, for probes of length 25, we need 100 masking steps. In the case of assynchronous embeddings, each probe can syntesize any number of nucleotides in any given cycle. This allows for shorter deposition sequences. Most (if not all) Affymetrix chips, for instance, can be synthesized in 74 masking steps.
+Formally, we have a set of probes $\mathcal{P} = \{p_{1}, p_{2}, ... p_{n}\}$ that are produced by a series of masks $\mathcal{M} = (m_{1}, m_{2}, ... m_{\mu})$, where each mask $m_{i}$ induces the addition of a particular nucleotide $\nu_{i} \in \alpha = \{A, C, G, T\}$ to a subset of~$\mathcal{P}$. The \emph{nucleotide deposition sequence} $\mathcal{S} = \nu_{1} \nu_{2} \ldots \nu_{\mu}$ corresponding to the sequence of nucleotides added at each masking step is therefore a supersequence of all $p_{i} \in \mathcal{P}$. In general, a probe can be \emph{embedded} within $\mathcal{S}$ in several ways. An embedding of $p_{j}$ is a $\mu$-tuple $\varepsilon = (e_{j,1}, e_{j,2}, ... e_{j,\mu})$ in which $e_{j,i} = 1$ if probe $p_{j}$ receives nucleotide $\nu_{i}$ (at step $i$), or 0 otherwise (Figure~\ref{fig:masking_process}).
 
 \begin{figure}
 % add figure
-\caption{Synthesis of a hypothetical 3x3 chip. a) Chip layout and 3-base-long probe sequences; b) deposition sequence and embeddings of the highlighted probes; c) the first three resulting photolithographic masks.}\label{fig:01}
+\caption{Synthesis of a hypothetical 3x3 chip. a) Chip layout and 3-base-long probe sequences; b) deposition sequence and embeddings of the highlighted probes; c) the first three resulting photolithographic masks.}
+\label{fig:masking_process}
 \end{figure}
+
+Deposition sequences are usually cyclical, that is $\mathcal{S}$ is a repeated permutation of $\alpha$. This is mainly because such sequences maximize the number of possible subsequences \citep{CHASE76}. In this context, we can distinguish between \emph{synchronous} and \emph{assynchronous} embeddings. In the first case, each probe has one and only one nucleotide synthesized in every cycle of the deposition sequence. Thus, 100 masking steps are needed to synthesize probes of length 25. In the case of assynchronous embeddings, probes can have any number of nucleotides syntesized in any given cycle. This allows for shorter deposition sequences. Most (if not all) Affymetrix chips, for instance, can be synthesized in 74 masking steps.
 
 Due to diffraction of light or internal reflection, untargeted spots can sometimes be accidentally activated in a certain masking step, producing unpredicted probes that can compromise the results of an experiment. This issue was described by \citealp{FODOR91} who noted that the problem is more likely to occur near the borders between masked and unmasked spots. This observation has given rise to the term \emph{border conflict}.
 
-We are interested in finding an arrangement of the probes on the chip together with their embeddings in such a way that we minimize the chances of unintended illumination during mask exposure steps. As we show in later sections, this problem is intrinsically hard and optimal solutions are unlikely to be found even for very small chips with fixed embeddings due to the exponential number of possible arrangements.
+We are interested in finding an arrangement of the probes on the chip together with their embeddings in such a way that we minimize the chances of unintended illumination during mask exposure steps. As we show in later sections, this problem is intrinsically hard and optimal solutions are unlikely to be found even for very small chips and fixed embeddings due to the exponential number of possible arrangements.
 
-If we consider all valid embeddings, the problem is even harder. A typical probe of an Affymetrix chip, for instance, can have up to several million possible embeddings. For this reason, the problem has been traditionally tackled in two steps. First, an initial embedding of the probes is fixed and an arrangement of these embeddings on the chip with minimum border conflicts is sought. This is usually refered to as the \emph{placement} problem. The second step is a \emph{post-placement} optimization that re-embeds the probes considering its location on the chip, in such a way that the conflicts with the neighboring spots are further reduced.
+If we consider all valid embeddings, the problem is even harder. A typical probe of an Affymetrix chip, for instance, can have up to several million possible embeddings. For this reason, the problem has been traditionally tackled in two phases. First, an initial embedding of the probes is fixed and an arrangement of these embeddings on the chip with minimum border conflicts is sought. This is usually refered to as the \emph{placement} problem. Second, a \emph{post-placement} optimization phase re-embeds the probes considering its location on the chip, in such a way that the conflicts with the neighboring spots are further reduced.
 
 In the next section, we review the Border Length Minimization Problem introduced by \citealp{HANNENHALLI02}, and define an extended model for evaluating microarray layouts. In section 3 we briefly review exising placement strategies. In section 4 we propose a new approach to the problem based on a quadratic assignment problem (QAP) formulation. We present the results of using a QAP heuritic algorithm to design small artificial chips in section 5, along with a comparison with the best known placement algorithm. In section 6 we describe how this approach can be used to design larger microarrays.
 
@@ -50,7 +51,7 @@ The \emph{border length} of a mask~$\mu_{i}$ is defined as the number of borders
 
 \subsection{Conflict Index}
 
-\citealp{KAHNG03_1} noted that the definition of border length does not take into account two simple yet important practical considerations: a) stray light might activate not only immediate neighbors but also probes that lie as far as three cells away from the targeted spot; and b) imperfections produced in the middle of a probe are more harmful than in its extremities.
+\citealp{KAHNG03_1} noted that the definition of border length does not take into account two simple yet important practical considerations: a) stray light might activate not only adjacent neighbors but also probes that lie as far as three cells away from the targeted spot; and b) imperfections produced in the middle of a probe are more harmful than in its extremities.
 
 With these observations in mind, we define the conflict index $\kappa(s)$ of a spot $s$ whose probes of length~$\ell_{s}$ are synthesized in $\mu$~masking steps as follows. First we define a distance-dependent weighting function, $\delta(s,s',i)$, that accounts for observation a) above:
 
@@ -71,14 +72,20 @@ where $d(s,s')$ is the Euclidian distance between spots~$s$ and~$s'$. We also us
         \left\{
                 \begin{array}{ll}
                         0 & \mbox{if spot $s$ is unmasked at step $i$}, \\
-                        1 + \log{\min(b_{s,i} + 1,\ell_{s} - b_{s,i} + 1)} & \mbox{otherwise}, \\
+                        c \cdot \exp{\left(\theta \cdot \lambda(s,i)\right)} & \mbox{otherwise}, \\
                 \end{array}
         \right.
 \end{equation}
 %%
-where $b_{s,i}$ denotes the number of nucleotides synthesized at spot $s$ up to and including step $i$.
+where
+%%
+\begin{equation}
+\label{eq:base_pos} \lambda(s,i) := 1 + \min(b_{s,i},\ell_{s} - b_{s,i})
+\end{equation}
+%%
+and $b_{s,i}$ denotes the number of nucleotides synthesized at spot $s$ up to and including step $i$.
 
-TODO: review this definition (use of exp?).
+TODO: review this definition.
 
 We now define the conflict index of a spot $s$ as
 
@@ -86,47 +93,125 @@ We now define the conflict index of a spot $s$ as
 \label{eq:conf_idx} \kappa(s) := \sum_{i=1}^{\mu} \left( \omega(s,i) \sum_{s'} \delta(s,s',i) \right),
 \end{equation}
 %%
-where $s'$ ranges over all spots near $s$ (in practice, only those inside a 7x7 grid centered in $s$).
+where $s'$ ranges over all spots near $s$ (in practice, only those inside a 7x7 grid centered in $s$ are considered).
 
-The definition of border length is somewhat connected to our definition of conflict index. However, while the first measures the quality of a mask, the latter estimates the risk of producing faulty probes in a given spot.
+Our definition of conflict index tries to capture the characteristics of the problem although some decisions were arbitrary. The distance-dependent weighthing function~$\delta$ is as suggested in \citealp{KAHNG03_1}.
 
-TODO: elaborate a bit more about the relation between border length and conflict index. Explain how the choice of position-dependent or distance weighting function can influence the border lenght when trying to reduce the conflict index. Also, mention that \citealp{KAHNG03_1} suggested to use square root for the position-dependent and that we decided to use an exponential relation.
+Our position-dependent weights~$\omega$, however, are different from those suggested in \citealp{KAHNG03_1}, which were defined as $\sqrt{\lambda(s,i)}$. The reason is that the chances of a successful hybridization between a probe and its target is related to the free energy of the formed duplex, which is, in turn, exponential in the number of consecutive paired bases.
+
+TODO: is this right? Add reference?
+
+The range of values for both $\delta$ and $\omega$ on a typical Affymetrix chip are illustrated in Figure~\ref{fig:conflit_index_values}.
+
+\begin{figure}
+% add figure
+\caption{Range of values for both $\delta$ and $\omega$ on a typical Affymetrix where probes of length~$\ell = 25$ are synthesized in $\mu = 74$~masking steps. a) Distance-dependent weighthing function $\delta$; b) position-dependent weights $\omega$.}
+\label{fig:conflit_index_values}
+\end{figure}
+
+The definition of border length is clearly related to our definition of conflict index. However, while the first measures the quality of a mask, the latter estimates the risk of producing faulty probes in a given spot. In general, a good layout is one with low border length as well as low average conflict index. It should be clear, however, that it is possible, for instance, to reduce the conflict index of a spot at the expense of an increase of border length.
 
 \section{Previous Work}
 
-In this section we review existing algorithmic techniques for designing oligonucleotide microarrays.
+In this section we review existing algorithmic techniques for designing oligonucleotide microarrays. We make a distinction between placement algorithms and partitioning algorithms. Post-placement optimizations such as the Chessboard \citep{KAHNG02} will not be covered.
 
-\citealp{FELDMAN93} were the first to formally address the border length problem. They described an optimal solution based on a 2-dimensional Gray code. However, their work is restricted to \emph{uniform arrays} (arrays containing all possible probes of a given length) and synchronous embeddings.
+\subsection{Placement Algorithms}
 
-\citealp{HANNENHALLI02} were the first to work with arrays of arbitrary probes. They reported that the first Affymetrix arrays were designed using a heuristic algorithm for the traveling salesman prolem (TSP). The idea consisted of building a weighted graph with nodes representing probes and edges containing the hamming distance between the probes. Then, a TSP tour with minimum weight was constructed, resuling in consecutive probes in the tour being likely to be similar. The TSP tour was then \emph{threaded} on the array in a row-by-row fashion. \citealp{HANNENHALLI02} enhanced this approach by suggesting a different threading of the TSP tour on the chip, called \emph{1-threading}, to achieve up to 20\% reduction in border length.
+The first to formally address the border length problem were \citealp{FELDMAN93}. They showed how an optimal placement can be constructed based on a 2-dimensional Gray code. However, their work is restricted to \emph{uniform arrays} (arrays containing all possible probes of a given length) and synchronous embeddings.
+
+\citealp{HANNENHALLI02} were the first to work with arrays of arbitrary probes. They reported that the first Affymetrix arrays were designed using a heuristic algorithm for the traveling salesman prolem (TSP). The idea consisted of building a weighted graph with nodes representing probes and edges containing the hamming distance between the probes. A TSP tour with minimum weight was then constructed, resuling in consecutive probes in the tour being likely to be similar. The TSP tour was finally \emph{threaded} on the array in a row-by-row fashion. \citealp{HANNENHALLI02} enhanced this approach by suggesting a different threading of the TSP tour on the chip, called \emph{1-threading}, to achieve up to 20\% reduction in border length.
 
 \citealp{KAHNG02} suggested an \emph{epitaxial} placement algorithm for arrays with synchronous embeddings. Their algorithm places a random probe in the center of the array and continues to insert probes in spots adjacent to already placed probes. It employs a greedy heuristic to select the next sequence to be placed among all non-placed probes in such a way that the number of border conflicts is reduced. With this algorithm, they claimed to achieve up to 10\% reduction in conflicts over the TSP-based approach of \citealp{HANNENHALLI02}.
 
-Although we believe that solution quality is more important than running time, the major problem with the epitaxial and the TSP-based algorithm, as noted in \citealp{KAHNG03_1}, is that they have at least quadratic time complexity and thus are not scalable for the latests million-probe microarrays.
+Although we believe that solution quality is more important than running time, the major problem with the epitaxial and the TSP-based algorithm, as noted in \citealp{KAHNG03_1}, is that they have at least quadratic time complexity and thus are not scalable for the latest million-probe microarrays.
 
-This observation has led to the development of two new algorithms in \citealp{KAHNG03_1}. The first one is a simple variant of the epitaxial algorithm described in \citealp{KAHNG02}, called row-epitaxial. The main differences are: a) spots are filled in a pre-defined order, namely row-by-row; and b) a limited number of candidates are considered when filling each spot.
+This observation has led to the development of two new algorithms \citep{KAHNG03_1}. The first one is a simple variant of the epitaxial algorithm described in \citealp{KAHNG02}, called row-epitaxial, with two main differences: spots are filled in a pre-defined order, namely row-by-row, and only probes of a limited list of candidates $Q$ are considered when filling each spot.
 
-The other algorithm, called sliding-window matching (SWM), needs an initial placement that can be constructed by, for instance, TSP and 1-threading. It iteratively improves the current placement by selecting an independent set of spots inside the window and optimally replacing their probes using a minimum-weight perfect matching algorithm. The term independent refers to probes that can be replaced without affecting the border length of the other selected probes.
+The other algorithm presented in \citep{KAHNG03_1}, called sliding-window matching (SWM), is not exactly a placement algorithm as it iteratively improves an initial placement that can be constructed by, for instance, TSP and 1-threading. Improvements are achieved by selecting an independent set of spots inside the window and optimally replacing their probes using a minimum-weight perfect matching algorithm. The term independent refers to probes that can be replaced without affecting the border length of the other selected probes.
 
-The experimental results in \citealp{KAHNG03_1} showed that the row-epitaxial algorithm outperforms the SWM algorithm, achieving up to 9\% reduction in border length when compared to the TSP-base approach of \citealp{HANNENHALLI02}.
+The experimental results of \citealp{KAHNG03_1} showed that the row-epitaxial is the best placement algorithm in terms of solution quality, achieving up to 9\% reduction in border length when compared to the TSP-based approach of \citealp{HANNENHALLI02}. The SWM is the fastest algorithm in practice.
 
 \subsection{Partitioning Algorithms}
 
-TODO: partitioning is a good idea (reduce problem size), explain Centroid-based quadrisection.
+The ever growing number of probes that must fit in the latest microarray chips and the  properties of the placement problem naturally suggest the use of partitioning strategies to minimize the running time of the algorithmic solutions.
+
+The placement problem can be trivially partitioned by dividing the set of probes into smaller sub-sets, and assingning these sub-sets to sub-regions of the chip. Each sub-region can then be treated as an independent chip or recursively partitioned.
+
+In this way, computationaly intensive methods can be used to solve smaller prolem instances that otherwise would take too much time. These smaller sub-problems can then be combined to produce a final solution. A partitioning is clearly a compromise in solution quality. However, due to the large number of probes, this compromise can be negligible.
+
+The only partitioning algorithm available in the literature is a simple recursive procedure called centroid-based quadrisection \citep{KAHNG03_1}. It randomly selects a probe $c_1$ from the probe set $\mathcal{P}$. Then, it examines all other probes of $\mathcal{P}$ and selects $c_2$ with maximum $hd(c_1,c_2)$, where $hd(c_1,c_2)$ is the hamming distance between the embeddings of $c_1$ and $c_2$. Similarly it finds $c_3$ with maximum $hd(c_1,c_3) + hd(c_2,c_3)$ and $c_4$ with maximum $hd(c_1,c_4) + hd(c_2,c_4) + hd(c_3,c_4)$. Probes $c_1$, $c_2$, $c_3$ and $c_4$ are called centroids. All other probes $p_i \in \mathcal{P}$ are then compared to the centroids and assigned to the sub-set $\mathcal{P}_j$ associated with centroid $c_j$ that has minimum $hd(p_i,c_j)$. Each sub-set $\mathcal{P}_j$ is assigned to a sub-region of the chip. The procedure is repeated recursively until a given maximum recursion depth $L$ is reached.
+
+The result of this algorithm is a partitioning of the chip into several sub-regions, where each is assigned to a sub-set of $\mathcal{P}$. For the actual placement of the probes in each sub-region, another placement algorithm is needed. For this purpose, \citealp{KAHNG03_1} have used the row-epitaxial algorithm.
+
+The results presented in \citealp{KAHNG03_1} shows that the running time of the row-epitaxial algorithm drops significantly with the partitioning. The time required for the row-epitaxial to place the probes of a 500x500 chip, for instance, droped by 69\% with $L = 3$. It is not clear from their experiments, however, how the choice of $L$ impairs the performance of the row-epitaxial algorithm in terms of solution quality. The maximum recursion depth presented was $L = 3$.
 
 \section{Quadratic Assignment Formulation}
 
-TODO: QAP problem, probe placement as a QAP formulation, GRASP.
+We now explore a different approach to the placement problem, based on a quadratic assignment problem (QAP) formulation.
+
+The quadratic assignment problem is a classical combinatorial optimization problem which was introduced by \citealp{KOOPMANS57}. The QAP can be formally stated as follows: given~$n \times n$ matrices $F = (f_{ij})$ and $D = (d_{ij})$, find a permutation $\pi$ of the natural numbers $1, 2, \ldots n$ minimizing
+%%
+\begin{equation}
+\label{eq:qap_def} \sum_{i=1}^{n} \sum_{j=1}^{n} f_{ij} d_{\pi(i)\pi(j)}
+\end{equation}
+%%
+
+The QAP has been used to model a variety of real-life problems. One of the major applications is the assignment of facilities to locations. In this context, $F$ is called the \emph{flow} matrix as $f_{ij}$ represents the flow of materials from facility $i$ to facility $j$, while $D$ is called the \emph{distance} matrix as $d_{ij}$ represents the distance between locations $i$ and $j$. The permutation $\pi$ gives a one-to-one assignment of facilities to locations in such a way that the transport of materials is minimal.
+
+The microarray placement problem that we discussed in the previous section can be seen as an instance of the QAP. Drawing a parallel with the assignment of facilities to locations, we can see the probes as the facilities and the spots as the locations. The distance matrix then represents the distance between the spots whereas the flow matrix contains the number of conflicts between the embeddings of the probes.
+
+Note that we consider the probes as having a single pre-defined embedding in order to force a one-to-one relationship. A more elaborate formulation would consider all possible embeddings of a probe, but then it would need to ensure that only one embedding of a probe is assigned.
+
+The exact definition of $F$ and $D$ depends whether the goal is to minimize border length or conflict index.
+
+\subsection{Border Length}
+
+The QAP formulation for the case of border length minimization is trivial. We set
+%%
+\begin{equation}
+f_{ij} = \frac{hd(p_i, p_j)}{2}
+\end{equation}
+%%
+where $hd(p_i, p_j)$ is the hamming distance between the embeddings of probes $p_i$ and $p_j$. We need to divide it by two because in equation \ref{eq:qap_def}, the conflicts between $p_i$ and $p_j$ appears twice (in $f_{ij}$ and $f_{ji}$). For the distance matrix, we set
+%%
+\begin{equation} d_{ij} :=
+        \left\{
+                \begin{array}{ll}
+                        1 & \mbox{if spots $i$ and $j$ are adjacent}, \\
+                        0 & \mbox{otherwise}, \\
+                \end{array}
+        \right.
+\end{equation}
+%%
+since only conflicts between adjacent spots are relevant for the border length.
+
+\subsection{Conflict Index}
+
+In case of conflict index minimization, we set
+%%
+\begin{equation}
+f_{ij} = wd(p_i, p_j)
+\end{equation}
+%%
+where $wd(p_i, p_j)$ is the \emph{weighted} distance between the embeddings of probes $p_i$ and $p_j$. For the distance matrix, we set...
+
+\section{QAP Heuristics}
+
+The QAP is known to be NP-hard and also NP-hard to approximate. In fact, instances of size larger than $n = 20$ are generally considered to be impossible to solve (to optimallity). Fortunately, several heuristics are available. In this section we briefly describe a heuristic algorithm, called GRASP (greedy randomized adaptive search procedure), that we have used in the context of the microarray placement problem.
+
+TODO: briefly describe GRASP and GRASP with path relinking.
 
 \section{Results}
 
-TODO: show results on small artificial chips.
+TODO: show results of running GRASP with path relinking on small artificial chips, compared to row-epitaxial.
 
 \section{Discussion}
 
-TODO: extrapolate to larger chips, argue that GRASP is good as a final placer and should be combined with a partitioning algorithm; it may also be used as an optimization algorithm if modified to take into account the border problem.
+TODO: extrapolate results to larger chips, argue that GRASP-PR is good as a final placer (combined with a partitioning algorithm); it may also be used as an optimization algorithm if modified to take into account the border around the optimized region.
 
 \begin{thebibliography}{}
+
+\bibitem[Koopmans and Beckmann, 1957]{KOOPMANS57} Koopmans,T.C. and Beckmann,M.J. (1957) Assignment problems and the location of economic activities, {\it Econometrica}, {\bf 25}, 53--76.
 
 \bibitem[Chase, 1976]{CHASE76} Chase,P.J. (1976) Subsequence numbers and logarithmic concavity, {\it Discrete Mathematics}, {\bf 16}, 123--140.
 
