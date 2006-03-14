@@ -2,6 +2,8 @@
 \copyrightyear{2006}
 \pubyear{2006}
 
+\usepackage[english]{babel}
+
 \begin{document}
 \firstpage{1}
 
@@ -25,7 +27,9 @@ Source code is available from the authors upon request.
 
 An oligonucleotide microarray is a piece of glass or plastic on which single-stranded fragments of DNA, called \emph{probes}, are affixed or synthesized. The chips produced by Affymetrix, for instance, can contain more than one million spots (or \emph{features}) as small as 11 $\mu$m, with each spot accommodating several million copies of a probe. Probes are typically 25 nucleotides long and are synthesized in parallel, on the chip, in a series of repetitive steps. Each step appends the same nucleotide to probes of selected regions of the chip. Selection occurs by exposure to light with the help of a photolithographic mask that allows or obstructs the passage of light accordingly \citep{FODOR91}.
 
-Formally, we have a set of probes $\mathcal{P} = \{p_{1}, p_{2}, ... p_{n}\}$ that are produced by a series of masks $\mathcal{M} = (m_{1}, m_{2}, ... m_{\mu})$, where each mask $m_{i}$ induces the addition of a particular nucleotide $\nu_{i} \in \alpha = \{A, C, G, T\}$ to a subset of~$\mathcal{P}$. The \emph{nucleotide deposition sequence} $\mathcal{S} = \nu_{1} \nu_{2} \ldots \nu_{\mu}$ corresponding to the sequence of nucleotides added at each masking step is therefore a supersequence of all $p_{i} \in \mathcal{P}$. In general, a probe can be \emph{embedded} within $\mathcal{S}$ in several ways. An embedding of $p_{j}$ is a $\mu$-tuple $\varepsilon = (e_{j,1}, e_{j,2}, ... e_{j,\mu})$ in which $e_{j,i} = 1$ if probe $p_{j}$ receives nucleotide $\nu_{i}$ (at step $i$), or 0 otherwise (Figure~\ref{fig:masking_process}).
+Formally, we have a set of probes $\mathcal{P} = \{p_{1}, p_{2}, ... p_{n}\}$ that are produced by a series of masks $\mathcal{M} = (m_{1}, m_{2}, ... m_{\mu})$, where each mask $m_{k}$ induces the addition of a particular nucleotide $t_{k} \in \alpha = \{A, C, G, T\}$ to a subset of~$\mathcal{P}$. The \emph{nucleotide deposition sequence} $\mathcal{S} = t_{1} t_{2} \ldots t_{\mu}$ corresponding to the sequence of nucleotides added at each masking step is therefore a supersequence of all $p_{i} \in \mathcal{P}$.
+
+In general, a probe can be \emph{embedded} within $\mathcal{S}$ in several ways. An embedding of $p_{i}$ is a $\mu$-tuple $\varepsilon_{i} = (e_{i,1}, e_{i,2}, ... e_{i,\mu})$ in which $e_{i,k} = 1$ if probe $p_{i}$ receives nucleotide $t_{k}$ (at step~$k$), or 0 otherwise (Figure~\ref{fig:masking_process}).
 
 \begin{figure}
 % add figure
@@ -47,7 +51,7 @@ In the next section, we review the Border Length Minimization Problem introduced
 
 \citealp{HANNENHALLI02} were the first to give a formal definition to the problem of unintended illumination in the production of microarrays. They formulated the Border Minimization Problem, which aims at finding an arrangement of the probes together with their embeddings in such a way the number of border conflicts during mask exposure steps is minimal.
 
-The \emph{border length} of a mask~$\mu_{i}$ is defined as the number of borders shared by masked and unmasked spots at masking step~$i$. The total border length of a given arrangement is the sum of border lengths over all masks.
+The \emph{border length} of a mask~$\mu_{k}$ is defined as the number of borders shared by masked and unmasked spots at masking step~$k$. The total border length of a given arrangement is the sum of border lengths over all masks.
 
 \subsection{Conflict Index}
 
@@ -57,13 +61,14 @@ The \emph{border length} of a mask~$\mu_{i}$ is defined as the number of borders
 \item[b)] imperfections produced in the middle of a probe are more harmful than in its extremities.
 \end{itemize}
 
-With these observations in mind, we define the conflict index~$\kappa(s)$ of a spot~$s$ whose probes of length~$\ell_{s}$ are synthesized in $\mu$~masking steps as follows. First we define a distance-dependent weighting function, $\delta(s,s',i)$, that accounts for observation a) above:
+With these observations in mind, we define the conflict index~$\kappa(s)$ of a spot~$s$ whose probes of length~$\ell_{s}$ are synthesized in $\mu$~masking steps as follows. First we define a distance-dependent weighting function, $\delta(s,s',k)$, that accounts for observation a) above:
 
 \begin{equation}
-\label{eq:dist_weight} \delta(s,s',i) :=
+\label{eq:dist_weight}
+\delta(s,s',k) :=
         \left\{
                 \begin{array}{ll}
-                        (d(s,s'))^{-2} & \mbox{if $s'$ is unmasked at step $i$}, \\
+                        (d(s,s'))^{-2} & \mbox{if $s'$ is unmasked at step $k$}, \\
                         0 & \mbox{otherwise}, \\
                 \end{array}
         \right.
@@ -72,10 +77,11 @@ With these observations in mind, we define the conflict index~$\kappa(s)$ of a s
 where $d(s,s')$ is the Euclidian distance between spots~$s$ and~$s'$. We also use position-dependent weights to account for observation b):
 %%
 \begin{equation}
-\label{eq:pos_mult} \omega(s,i) :=
+\label{eq:pos_mult}
+\omega(s,k) :=
         \left\{
                 \begin{array}{ll}
-                        c \cdot \exp{\left(\theta \cdot \lambda(s,i)\right)} & \mbox{if $s$ is masked at step $i$}, \\
+                        c \cdot \exp{\left(\theta \cdot \lambda(s,k)\right)} & \mbox{if $s$ is masked at step $k$}, \\
                         0 & \mbox{otherwise}, \\
                 \end{array}
         \right.
@@ -84,22 +90,34 @@ where $d(s,s')$ is the Euclidian distance between spots~$s$ and~$s'$. We also us
 where
 %%
 \begin{equation}
-\label{eq:base_pos} \lambda(s,i) := 1 + \min(b_{s,i},\ell_{s} - b_{s,i}),
+\label{eq:base_pos}
+\lambda(s,k) := 1 + \min(b_{s,k},\ell_{s} - b_{s,k}),
 \end{equation}
 %%
-$c$ and $\theta$ are constants, and $b_{s,i}$ denotes the number of nucleotides synthesized at spot~$s$ up to and including step~$i$.
+$c$ and $\theta$ are constants, and $b_{s,k}$ denotes the number of nucleotides synthesized at spot~$s$ up to and including step~$k$.
 
 TODO: review this definition.
 
 We now define the conflict index of a spot $s$ as
 
 \begin{equation}
-\label{eq:conf_idx} \kappa(s) := \sum_{i=1}^{\mu} \left( \omega(s,i) \sum_{s'} \delta(s,s',i) \right),
+\label{eq:conf_idx}
+\mathcal{C}(s) := \sum_{k=1}^{\mu} \left( \omega(s,k) \sum_{s'} \delta(s,s',k) \right),
 \end{equation}
 %%
-where $s'$ ranges over all spots near $s$. We limit the range of neighboring spots $s'$ to those that are at most three cells away from $s$, in accordance with observation a).
+where $s'$ ranges over all spots that are at most three cells away from $s$, in accordance with observation a).
 
-Our definition of conflict index aims at capturing the characteristics of the problem although some decisions were rather arbitrary. The distance-dependent weighthing function~$\delta$ is as suggested in \citealp{KAHNG03_1}. Our position-dependent weights~$\omega$, however, are different. Instead of using $\sqrt{\lambda(s,i)}$, we decided to use an exponential function. The reason is that the chances of a successful hybridization between a probe and its target is related to the free energy of the formed duplex, which is exponential in the number of consecutive paired bases. The range of values for both~$\delta$ and~$\omega$ on a typical Affymetrix chip are illustrated in Figure~\ref{fig:conflit_index_values}.
+Our definition of conflict index aims at capturing the characteristics of the problem of unintended illumination but some decisions were rather arbitrary. We set the constants $c$ and $\theta$ as follows:
+%%
+\begin{displaymath}
+\theta = \frac{5}{l_s},
+\end{displaymath}
+%%
+\begin{displaymath}
+c = \frac{1}{\theta}.
+\end{displaymath}
+
+The distance-dependent weighthing function~$\delta$ is as suggested in \citealp{KAHNG03_1}. Our position-dependent weights~$\omega$, however, are different. Instead of using $\sqrt{\lambda(s,k)}$, we decided to use an exponential function. The reason is that the chances of a successful hybridization between a probe and its target is related to the free energy of the formed duplex, which is exponential in the number of consecutive paired bases. The range of values for both~$\delta$ and~$\omega$ on a typical Affymetrix chip are illustrated in Figure~\ref{fig:conflit_index_values}.
 
 TODO: is this right? Add reference?
 
@@ -132,6 +150,7 @@ The other algorithm presented in \citep{KAHNG03_1}, called sliding-window matchi
 The experimental results of \citealp{KAHNG03_1} showed that the row-epitaxial is the best placement algorithm in terms of solution quality, achieving up to 9\% reduction in border length when compared to the TSP-based approach of \citealp{HANNENHALLI02}. The SWM is the fastest algorithm in practice.
 
 \subsection{Partitioning Algorithms}
+\label{sec:partition}
 
 The ever growing number of probes that must fit in the latest microarray chips and the  properties of the placement problem naturally suggest the use of partitioning strategies to minimize the running time of the algorithmic solutions.
 
@@ -152,7 +171,8 @@ We now explore a different approach to the placement problem, based on a quadrat
 The quadratic assignment problem is a classical combinatorial optimization problem introduced by \citealp{KOOPMANS57}. The QAP can be formally stated as follows. Given~$n \times n$ matrices $F = (f_{ij})$ and $D = (d_{ij})$, find a permutation $\pi$ of the natural numbers $1, 2, \ldots n$ minimizing
 %%
 \begin{equation}
-\label{eq:qap_def} \sum_{i=1}^{n} \sum_{j=1}^{n} f_{ij} d_{\pi(i)\pi(j)}
+\label{eq:qap_def}
+\sum_{i=1}^{n} \sum_{j=1}^{n} f_{ij} d_{\pi(i)\pi(j)}
 \end{equation}
 %%
 
@@ -174,34 +194,106 @@ f_{ij} = \frac{hd(p_i, p_j)}{2}
 %%
 where $hd(p_i, p_j)$ is the hamming distance between the embeddings of probes $p_i$ and $p_j$. We need to divide it by two because in equation \ref{eq:qap_def}, the conflicts between $p_i$ and $p_j$ appears twice (in $f_{ij}$ and $f_{ji}$). For the distance matrix, we set
 %%
-\begin{equation} d_{ij} :=
+\begin{equation}
+d_{ij} =
+	\left\{
+		\begin{array}{ll}
+			1 & \mbox{if spots $i$ and $j$ are adjacent}, \\
+			0 & \mbox{otherwise}, \\
+		\end{array}
+	\right.
+\end{equation}
+%%
+since only conflicts between adjacent spots are relevant for the border length. It is easy to verify that this formulation reflects the definition of border length.
+
+\subsection{Conflict Index Minimization}
+
+In case of conflict index minimization, the formulation is slightly more elaborate. Our goal is to design a microarray minimizing the sum of conflict indices over all spots $i$
+%%
+\begin{equation}
+\label{eq:ci_min}
+\sum_{i} \mathcal{C}(i).
+\end{equation}
+
+From the point of view of a spot~$i$, there is a conflict at step~$k$ only when $i$ is masked and a close neighbor~$j$ is unmasked, in which case we say that there is an \emph{induced conflict} of~$j$ onto~$i$, $\mathcal{C}_{j}(i)$, that can be derived from equation \ref{eq:conf_idx} as
+%%
+\begin{equation}
+\label{eq:induced_conf_idx}
+\mathcal{C}_{j}(i) := \sum_{k=1}^{\mu} \omega(i,k) \cdot \delta(i,j,k).
+\end{equation}
+
+We can then rewrite equation \ref{eq:conf_idx} as
+%%
+\begin{equation}
+\mathcal{C}(i) := \sum_{j} \mathcal{C}_{j}(i),
+\end{equation}
+%%
+and our problem stated in equation \ref{eq:ci_min} turns into
+%%
+\begin{equation}
+\label{eq:ci_min_qap}
+\sum_{i} \sum_{j} \mathcal{C}_{j}(i),
+\end{equation}
+%%
+where $j$ ranges over all spots that are at most three cells away from $i$.
+
+Equations \ref{eq:qap_def} and \ref{eq:ci_min_qap} are conveniently similar. Now we just need to set $f_{ij}$ and $d_{ij}$ in such a way that their multiplication results in $\mathcal{C}_{j}(i)$. The dependence of $\delta$ on $k$ is due to the fact that $\delta(i,j,k) = 0$ if spot~$j$ is masked at step $k$. It is thus possible to rewrite equation \ref{eq:induced_conf_idx} as
+%%
+\begin{equation}
+\mathcal{C}_{j}(i) := (d(i,j))^{-2} \cdot \sum_{k=1}^{\mu} \omega(i,k) \cdot \phi(j,k),
+\end{equation}
+%%
+where
+%%
+\begin{equation}
+\phi(j,k) :=
         \left\{
                 \begin{array}{ll}
-                        1 & \mbox{if spots $i$ and $j$ are adjacent}, \\
+                        1 & \mbox{if spot $j$ is unmasked at step $k$}, \\
                         0 & \mbox{otherwise}, \\
                 \end{array}
         \right.
 \end{equation}
 %%
-since only conflicts between adjacent spots are relevant for the border length.
+and $d(i,j)$ is the Euclidean distance between spots~$i$ and~$j$ as used in the definition of $\delta$ (equation \ref{eq:dist_weight}).
 
-\subsection{Conflict Index Minimization}
-
-In case of conflict index minimization, we set
+Now we just need to set
 %%
 \begin{equation}
-f_{ij} = wd(p_i, p_j)
+f_{ij} = \sum_{k=1}^{\mu} \omega(i,k) \cdot \phi(j,k).
 \end{equation}
 %%
-where $wd(p_i, p_j)$ is the \emph{weighted} distance between the embeddings of probes $p_i$ and $p_j$. For the distance matrix, we set...
-
+and
+%%
+\begin{equation}
+d_{ij} =
+	\left\{
+                \begin{array}{ll}
+                        (d(i,j))^{-2} & \mbox{if spot $i$ is ``near'' spot $j$}, \\
+                        0 & \mbox{otherwise}, \\
+                \end{array}
+	\right.
+\end{equation}
+%%
+where ``near'' means that spot~$i$ is at most three cells away from~$j$.
+	
 \section{QAP Heuristics}
 
-The QAP is known to be NP-hard and also NP-hard to approximate. In fact, instances of size larger than $n = 20$ are generally considered to be impossible to solve (to optimallity). Fortunately, several heuristics are available. In this section we briefly describe a heuristic algorithm, called GRASP (greedy randomized adaptive search procedure), that we have used in the context of the microarray placement problem.
+In the previous section we showed how the microarray placement problem can be modeled as a quadratic assignment problem. This is convenient because we can now use existing QAP algorithms to design the layout of microarrays minimizing either the sum of border lengths or conflict indices. 
 
-TODO: briefly describe GRASP and GRASP with path relinking.
+The QAP is known to be NP-hard and NP-hard to approximate, and instances of size larger than $n = 20$ are generally considered to be impossible to solve (to optimallity). Fortunately, several heuristics are available.
+
+In this section we briefly describe a heuristic approach called GRASP that was proposed by \citealp{FEO95} and used by \citealp{LI94} for solving QAP instances. We also outline a GRASP variant known as GRASP with path-relinking \citep{OLIVEIRA04} that we have used to design the layout of microarray chips.
+
+GRASP (greedy randomized adaptive search procedure)...
+
+GRASP with path-relinking (GRASP-PR)...
 
 \section{Results}
+
+We now present experimental results of using GRASP with path-relinking (GRASP-PR) for designing microarray chips.
+
+Due to the large number of probes on industrial microarrays, we cannot use GRASP-PR (or any other QAP method) to design the layout of real chips. However, it is certainly possible to use it to design small regions of a chip. This is interesting because we can combine GRASP-PR with a partitioning strategy such as the centroid-based quadrisection described in section \ref{sec:partition}.
 
 TODO: show results of running GRASP with path relinking on small artificial chips, compared to row-epitaxial.
 
@@ -219,6 +311,10 @@ TODO: extrapolate results to larger chips, argue that GRASP-PR is good as a fina
 
 \bibitem[Feldman and Pevzner, 1994]{FELDMAN93} Feldman,W. and Pevzner,P. (1994) Gray code masks for sequencing by hibridization, {\it Genomics}, {\bf 23}, 233--235.
 
+\bibitem[Li {\it et~al}., 1994]{LI94} Li,Y., Pardalos,P.M. and Resende,M.G.C. (1994) A greedy randomized adaptive search procedure for the quadratic assignment problem, in {\it Quadratic Assignment and Related Problems}, Pardalos,P. and Wolkowicz,H. (editors), {\it DIMACS Series in Discrete Mathematics and Theoretical Computer Science}, {\bf 16}, 237--261.
+
+\bibitem[Feo and Resende, 1995]{FEO95} Feo,T.A. and Resende,M.G.C. (1995) Greedy randomized adaptive search procedures, {\it Journal of Global Optimization}, {\bf 6}, 109--133.
+
 \bibitem[Hannenhalli {\it et~al}, 2002]{HANNENHALLI02} Hannenhalli,S., Hubell,E., Lipshutz,R. and Pevzner,P. (2002) Combinatorial algorithms for design of DNA arrays, {\it Advances in Biochemical Engineering / Biotechnology}, {\bf 77}, 1--19.
 
 \bibitem[Kahng {\it et~al}, 2002]{KAHNG02} Kahng,A.B., Mandoiu,I.I., Pevzner,P.A., Reda,S. and Zelikovsky,A.Z. (2002) Border length minimization in DNA array design, {\it Proceedings of the Second Workshop on Algorithms in Bioinformatics}.
@@ -226,6 +322,8 @@ TODO: extrapolate results to larger chips, argue that GRASP-PR is good as a fina
 \bibitem[Kahng {\it et~al}, 2003/1]{KAHNG03_1} Kahng,A.B., Mandoiu,I., Pevzner,P., Reda,S. and Zelikovsky,A. (2003-1) Engineering a scalable placement heuristic for DNA probe arrays, {\it Proceedings of the Seventh Annual International Conference on Computational Molecular Biology}, 148--83.
 
 \bibitem[Kahng {\it et~al}, 2003/2]{KAHNG03_2} Kahng, A.B., Mandoiu,I., Reda,S., Xu,X. and Zelikovsky,A. (2003-2), Evaluation of placement techniques for DNA probe array layout, {\it Proceedings of the IEEE/ACM International Conference on Computer-Aided Design}, 262--269.
+
+\bibitem[Oliveira {\it et~al}, 2004]{OLIVEIRA04} Oliveira,C.A.S., Pardalos,P.M. and Resende,M.G.C. (2004) GRASP with path-relinking for the quadratic assignment problem, AT\&T Labs Technical Report.
 
 \end{thebibliography}
 \end{document}
