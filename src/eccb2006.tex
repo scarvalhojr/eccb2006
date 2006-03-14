@@ -5,8 +5,8 @@
 \begin{document}
 \firstpage{1}
 
-\title[short Title]{Quadratic Assignment and the Layout of Oligonucleotide Microarrays}
-\author[Sample \textit{et~al}]{S\'ergio A. de Carvalho Jr.\,$^{\rm a}$ and Sven Rahmann\,$^{\rm b}$}
+\title[Quadratic assignment and microarrays]{Quadratic Assignment and the Layout of Oligonucleotide Microarrays}
+\author[S.A.de Carvalho Jr. and S.Rahmann]{S\'ergio A. de Carvalho Jr.\,$^{\rm a}$ and Sven Rahmann\,$^{\rm b}$}
 \address{$^{\rm a}$Graduiertenkolleg Bioinformatik, Bielefeld University, Germany,\\$^{\rm b}$Algorithms and Statistics for Systems Biology, Genome Informatics, Bielefeld University, Germany.}
 \maketitle
 
@@ -51,16 +51,20 @@ The \emph{border length} of a mask~$\mu_{i}$ is defined as the number of borders
 
 \subsection{Conflict Index}
 
-\citealp{KAHNG03_1} noted that the definition of border length does not take into account two simple yet important practical considerations: a) stray light might activate not only adjacent neighbors but also probes that lie as far as three cells away from the targeted spot; and b) imperfections produced in the middle of a probe are more harmful than in its extremities.
+\citealp{KAHNG03_1} noted that the definition of border length does not take into account two simple yet important practical considerations:
+\begin{itemize}
+\item[a)] stray light might activate not only adjacent neighbors but also probes that lie as far as three cells away from the targeted spot;
+\item[b)] imperfections produced in the middle of a probe are more harmful than in its extremities.
+\end{itemize}
 
-With these observations in mind, we define the conflict index $\kappa(s)$ of a spot $s$ whose probes of length~$\ell_{s}$ are synthesized in $\mu$~masking steps as follows. First we define a distance-dependent weighting function, $\delta(s,s',i)$, that accounts for observation a) above:
+With these observations in mind, we define the conflict index~$\kappa(s)$ of a spot~$s$ whose probes of length~$\ell_{s}$ are synthesized in $\mu$~masking steps as follows. First we define a distance-dependent weighting function, $\delta(s,s',i)$, that accounts for observation a) above:
 
 \begin{equation}
 \label{eq:dist_weight} \delta(s,s',i) :=
         \left\{
                 \begin{array}{ll}
-                        0 & \mbox{if spot $s'$ is masked at step $i$}, \\
-                        \frac{1}{(d(s,s'))^{2}} & \mbox{otherwise}, \\
+                        (d(s,s'))^{-2} & \mbox{if $s'$ is unmasked at step $i$}, \\
+                        0 & \mbox{otherwise}, \\
                 \end{array}
         \right.
 \end{equation}
@@ -71,8 +75,8 @@ where $d(s,s')$ is the Euclidian distance between spots~$s$ and~$s'$. We also us
 \label{eq:pos_mult} \omega(s,i) :=
         \left\{
                 \begin{array}{ll}
-                        0 & \mbox{if spot $s$ is unmasked at step $i$}, \\
-                        c \cdot \exp{\left(\theta \cdot \lambda(s,i)\right)} & \mbox{otherwise}, \\
+                        c \cdot \exp{\left(\theta \cdot \lambda(s,i)\right)} & \mbox{if $s$ is masked at step $i$}, \\
+                        0 & \mbox{otherwise}, \\
                 \end{array}
         \right.
 \end{equation}
@@ -80,10 +84,10 @@ where $d(s,s')$ is the Euclidian distance between spots~$s$ and~$s'$. We also us
 where
 %%
 \begin{equation}
-\label{eq:base_pos} \lambda(s,i) := 1 + \min(b_{s,i},\ell_{s} - b_{s,i})
+\label{eq:base_pos} \lambda(s,i) := 1 + \min(b_{s,i},\ell_{s} - b_{s,i}),
 \end{equation}
 %%
-and $b_{s,i}$ denotes the number of nucleotides synthesized at spot $s$ up to and including step $i$.
+$c$ and $\theta$ are constants, and $b_{s,i}$ denotes the number of nucleotides synthesized at spot~$s$ up to and including step~$i$.
 
 TODO: review this definition.
 
@@ -93,23 +97,19 @@ We now define the conflict index of a spot $s$ as
 \label{eq:conf_idx} \kappa(s) := \sum_{i=1}^{\mu} \left( \omega(s,i) \sum_{s'} \delta(s,s',i) \right),
 \end{equation}
 %%
-where $s'$ ranges over all spots near $s$ (in practice, only those inside a 7x7 grid centered in $s$ are considered).
+where $s'$ ranges over all spots near $s$. We limit the range of neighboring spots $s'$ to those that are at most three cells away from $s$, in accordance with observation a).
 
-Our definition of conflict index tries to capture the characteristics of the problem although some decisions were arbitrary. The distance-dependent weighthing function~$\delta$ is as suggested in \citealp{KAHNG03_1}.
-
-Our position-dependent weights~$\omega$, however, are different from those suggested in \citealp{KAHNG03_1}, which were defined as $\sqrt{\lambda(s,i)}$. The reason is that the chances of a successful hybridization between a probe and its target is related to the free energy of the formed duplex, which is, in turn, exponential in the number of consecutive paired bases.
+Our definition of conflict index aims at capturing the characteristics of the problem although some decisions were rather arbitrary. The distance-dependent weighthing function~$\delta$ is as suggested in \citealp{KAHNG03_1}. Our position-dependent weights~$\omega$, however, are different. Instead of using $\sqrt{\lambda(s,i)}$, we decided to use an exponential function. The reason is that the chances of a successful hybridization between a probe and its target is related to the free energy of the formed duplex, which is exponential in the number of consecutive paired bases. The range of values for both~$\delta$ and~$\omega$ on a typical Affymetrix chip are illustrated in Figure~\ref{fig:conflit_index_values}.
 
 TODO: is this right? Add reference?
 
-The range of values for both $\delta$ and $\omega$ on a typical Affymetrix chip are illustrated in Figure~\ref{fig:conflit_index_values}.
-
 \begin{figure}
 % add figure
-\caption{Range of values for both $\delta$ and $\omega$ on a typical Affymetrix where probes of length~$\ell = 25$ are synthesized in $\mu = 74$~masking steps. a) Distance-dependent weighthing function $\delta$; b) position-dependent weights $\omega$.}
+\caption{Range of values for both $\delta$ and $\omega$ on a typical Affymetrix chip where probes of length~$\ell = 25$ are synthesized in $\mu = 74$~masking steps. a) Distance-dependent weighthing function $\delta$; b) position-dependent weights $\omega$.}
 \label{fig:conflit_index_values}
 \end{figure}
 
-The definition of border length is clearly related to our definition of conflict index. However, while the first measures the quality of a mask, the latter estimates the risk of producing faulty probes in a given spot. In general, a good layout is one with low border length as well as low average conflict index. It should be clear, however, that it is possible, for instance, to reduce the conflict index of a spot at the expense of an increase of border length.
+The definition of border length is clearly related to our definition of conflict index. However, while the first measures the quality of a mask, the latter estimates the risk of producing faulty probes in a given spot. A good layout is one with low border length as well as low average conflict index, although it is possible, for instance, to reduce the conflict index of a spot at the expense of an increase of border length.
 
 \section{Previous Work}
 
@@ -149,22 +149,22 @@ The results presented in \citealp{KAHNG03_1} shows that the running time of the 
 
 We now explore a different approach to the placement problem, based on a quadratic assignment problem (QAP) formulation.
 
-The quadratic assignment problem is a classical combinatorial optimization problem which was introduced by \citealp{KOOPMANS57}. The QAP can be formally stated as follows: given~$n \times n$ matrices $F = (f_{ij})$ and $D = (d_{ij})$, find a permutation $\pi$ of the natural numbers $1, 2, \ldots n$ minimizing
+The quadratic assignment problem is a classical combinatorial optimization problem introduced by \citealp{KOOPMANS57}. The QAP can be formally stated as follows. Given~$n \times n$ matrices $F = (f_{ij})$ and $D = (d_{ij})$, find a permutation $\pi$ of the natural numbers $1, 2, \ldots n$ minimizing
 %%
 \begin{equation}
 \label{eq:qap_def} \sum_{i=1}^{n} \sum_{j=1}^{n} f_{ij} d_{\pi(i)\pi(j)}
 \end{equation}
 %%
 
-The QAP has been used to model a variety of real-life problems. One of the major applications is the assignment of facilities to locations. In this context, $F$ is called the \emph{flow} matrix as $f_{ij}$ represents the flow of materials from facility $i$ to facility $j$, while $D$ is called the \emph{distance} matrix as $d_{ij}$ represents the distance between locations $i$ and $j$. The permutation $\pi$ gives a one-to-one assignment of facilities to locations in such a way that the transport of materials is minimal.
+The QAP has been used to model a variety of real-life problems. One of its major applications is the facility location problem where $n$ facilities need to be assigned to $n$ locations. In this context, $F$ is called the \emph{flow} matrix where $f_{ij}$ represents the flow of materials from facility $i$ to facility $j$. Matrix $D$ is then called the \emph{distance} matrix where $d_{ij}$ represents the distance between locations $i$ and $j$. The permutation $\pi$ gives a one-to-one assignment of facilities to locations in such a way that the transport of materials is minimal.
 
-The microarray placement problem that we discussed in the previous section can be seen as an instance of the QAP. Drawing a parallel with the assignment of facilities to locations, we can see the probes as the facilities and the spots as the locations. The distance matrix then represents the distance between the spots whereas the flow matrix contains the number of conflicts between the embeddings of the probes.
+The microarray placement problem discussed in previous sections can be seen as an instance of a QAP. Drawing a parallel with the facility location, we can view the probes as facilities and the spots as locations. The flow matrix then contains the number of conflicts between probe embeddings whereas the distance matrix contains the distance between the spots.
 
-Note that we consider the probes as having a single pre-defined embedding in order to force a one-to-one relationship. A more elaborate formulation would consider all possible embeddings of a probe, but then it would need to ensure that only one embedding of a probe is assigned.
+Note that, in this formulation, we consider the probes as having a single pre-defined embedding in order to force a one-to-one relationship. A more elaborate formulation would consider all possible embeddings of a probe but, then, it would be necessary to ensure that only one embedding of a probe is assigned to a spot.
 
-The exact definition of $F$ and $D$ depends whether the goal is to minimize border length or conflict index.
+The exact contents of $F$ and $D$ depends whether the goal is to minimize border length or conflict index.
 
-\subsection{Border Length}
+\subsection{Border Length Minimization}
 
 The QAP formulation for the case of border length minimization is trivial. We set
 %%
@@ -185,7 +185,7 @@ where $hd(p_i, p_j)$ is the hamming distance between the embeddings of probes $p
 %%
 since only conflicts between adjacent spots are relevant for the border length.
 
-\subsection{Conflict Index}
+\subsection{Conflict Index Minimization}
 
 In case of conflict index minimization, we set
 %%
@@ -223,9 +223,9 @@ TODO: extrapolate results to larger chips, argue that GRASP-PR is good as a fina
 
 \bibitem[Kahng {\it et~al}, 2002]{KAHNG02} Kahng,A.B., Mandoiu,I.I., Pevzner,P.A., Reda,S. and Zelikovsky,A.Z. (2002) Border length minimization in DNA array design, {\it Proceedings of the Second Workshop on Algorithms in Bioinformatics}.
 
-\bibitem[Kahng {\it et~al}, 2003-1]{KAHNG03_1} Kahng,A.B., Mandoiu,I., Pevzner,P., Reda,S. and Zelikovsky,A. (2003-1) Engineering a scalable placement heuristic for DNA probe arrays, {\it Proceedings of the Seventh Annual International Conference on Computational Molecular Biology}, 148--83.
+\bibitem[Kahng {\it et~al}, 2003/1]{KAHNG03_1} Kahng,A.B., Mandoiu,I., Pevzner,P., Reda,S. and Zelikovsky,A. (2003-1) Engineering a scalable placement heuristic for DNA probe arrays, {\it Proceedings of the Seventh Annual International Conference on Computational Molecular Biology}, 148--83.
 
-\bibitem[Kahng {\it et~al}, 2003-2]{KAHNG03_2} Kahng, A.B., Mandoiu,I., Reda,S., Xu,X. and Zelikovsky,A. (2003-2), Evaluation of placement techniques for DNA probe array layout, {\it Proceedings of the IEEE/ACM International Conference on Computer-Aided Design}, 262--269.
+\bibitem[Kahng {\it et~al}, 2003/2]{KAHNG03_2} Kahng, A.B., Mandoiu,I., Reda,S., Xu,X. and Zelikovsky,A. (2003-2), Evaluation of placement techniques for DNA probe array layout, {\it Proceedings of the IEEE/ACM International Conference on Computer-Aided Design}, 262--269.
 
 \end{thebibliography}
 \end{document}
