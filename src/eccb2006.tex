@@ -134,6 +134,7 @@ The definition of border length is clearly related to our definition of conflict
 In this section we review existing algorithmic techniques for designing oligonucleotide microarrays. We make a distinction between placement algorithms and partitioning algorithms. Post-placement optimizations such as the Chessboard \citep{KAHNG02} are not covered.
 
 \subsection{Placement Algorithms}
+\label{sec:placement_alg}
 
 The first to formally address the border length problem were \citealp{FELDMAN93}. They showed how an optimal placement can be constructed based on a 2-dimensional Gray code. However, their work is restricted to \emph{uniform arrays} (arrays containing all possible probes of a given length) and synchronous embeddings.
 
@@ -318,9 +319,25 @@ GRASP with path-relinking (GRASP-PR)...
 
 We now present experimental results of using GRASP with path-relinking (GRASP-PR) for designing microarray chips.
 
-Due to the large number of probes on industrial microarrays, we cannot use GRASP-PR (or any other QAP method) to design the layout of an entire microarray chip. However, it is certainly possible to use it to design small regions of a chip. This is interesting because we can combine GRASP-PR with a partitioning strategy such as the centroid-based quadrisection described in section \ref{sec:partition}.
+Due to the large number of probes on industrial microarrays, we cannot use GRASP-PR (or any other QAP method) to design the layout of an entire microarray chip. However, it is certainly possible to use it on small regions of a chip. This is interesting because we can combine GRASP-PR with a partitioning strategy such as the centroid-based quadrisection described in section \ref{sec:partition}.
 
-TODO: show results of running GRASP with path relinking on small artificial chips, compared to row-epitaxial.
+We have run GRASP-PR and the best know placement algorithm, row-epitaxial (see section \ref{sec:placement_alg}), on several artificial random chips. The running time and the border length (border length divided by the number of probes) of the resulting layouts are shown on table \ref{tab:graspr_reptx}.
+
+\begin{table*}[t]
+\processtable{Border length of layouts produced by row-epitaxial and GRASP-PR on chips with random probes of length 25 synchronously embedded. Reduction in border conflicts are reported in percentage compared to the initial layout.\label{tab:graspr_reptx}}
+{\begin{tabular}{crrcrrrcrrr} \toprule
+          &            & random & & \multicolumn{3}{c}{row-epitaxial}  & & \multicolumn{3}{c}{GRASP-PR}  \\ \cline{3-3} \cline{5-7} \cline{9-11}
+chip      & number of  & border & & border & reduction & time          & & border & reduction & time   \\
+dimension & probes     & length & & length & (\%)      & (sec.)        & & length & (\%)      & (sec.) \\ \midrule
+6x6 & 36 & 2242.4 & & 1952.4 & 12.93 & 3.2 & & 1896.4 & 15.43 & 3.5 \\
+7x7 & 49 & & & & & & & & & \\
+8x8 & 64 & & & & & & & & & \\
+9x9 & 81 & & & & & & & & & \\
+10x10 & 100 & 6684.8 & & 5562.8 & 16.78 & 8.7 & & 5522.8 & 17.38 & 33.5 \\
+11x11 & 121 & & & & & & & & & \\
+12x12 & 144 & & & & & & & & & \\ \botrule
+\end{tabular}}{Border length in each case are averages over a set of five chips; running times are averages over three runs for each chip of a set.}
+\end{table*}
 
 \section{Discussion}
 
