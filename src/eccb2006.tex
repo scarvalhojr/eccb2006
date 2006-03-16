@@ -37,11 +37,11 @@ In general, a probe can be \emph{embedded} within $\mathcal{S}$ in several ways.
 \label{fig:masking_process}
 \end{figure}
 
-Deposition sequences are usually cyclical, that is $\mathcal{S}$ is a repeated permutation of $\alpha$. This is mainly because such sequences maximize the number of possible subsequences \citep{CHASE76}. In this context, we can distinguish between \emph{synchronous} and \emph{assynchronous} embeddings. In the first case, each probe has one and only one nucleotide synthesized in every cycle of the deposition sequence; thus, 100 masking steps are needed to synchronously synthesize probes of length 25. In the case of assynchronous embeddings, probes can have any number of nucleotides syntesized in any given cycle. This allows for shorter deposition sequences. Most (if not all) Affymetrix chips, for instance, can be synthesized in 74 masking steps.
+Deposition sequences are usually cyclical, that is $\mathcal{S}$ is a repeated permutation of $\alpha$. This is mainly because such sequences maximize the number of possible subsequences \citep{CHASE76}. In this context, we can distinguish between \emph{synchronous} and \emph{asynchronous} embeddings. In the first case, each probe has one and only one nucleotide synthesized in every cycle of the deposition sequence; thus, 100 masking steps are needed to synchronously synthesize probes of length 25. In the case of asynchronous embeddings, probes can have any number of nucleotides syntesized in any given cycle. This allows for shorter deposition sequences. Most (if not all) Affymetrix chips, for instance, can be synthesized in 74 masking steps.
 
 Due to diffraction of light or internal reflection, untargeted spots can sometimes be accidentally activated in a certain masking step, producing unpredicted probes that can compromise the results of an experiment. This issue was described by \citealp{FODOR91} who noted that the problem is more likely to occur near the borders between masked and unmasked spots. This observation has given rise to the term \emph{border conflict}.
 
-We are interested in finding an arrangement of the probes on the chip together with their embeddings in such a way that we minimize the chances of unintended illumination during mask exposure steps. As we show in later sections, this problem is intrinsically hard and optimal solutions are unlikely to be found, even for very small chips and fixed embeddings, due to the exponential number of possible arrangements.
+We are interested in finding an arrangement of the probes on the chip together with their embeddings in such a way that we minimize the chances of unintended illumination during mask exposure steps. As we show in later sections, this problem is intrinsically hard due to the exponential number of possible arrangements, and optimal solutions are unlikely to be found even for very small chips and even if we consider the probes as having a single pre-defined embedding.
 
 If we consider all valid embeddings, the problem is even harder. A typical probe of an Affymetrix chip, for instance, can have up to several million possible embeddings. For this reason, the problem has been traditionally tackled in two phases. First, an initial embedding of the probes is fixed and an arrangement of these embeddings on the chip with minimum border conflicts is sought. This is usually refered to as the \emph{placement} problem. Second, a \emph{post-placement} optimization phase re-embeds the probes considering its location on the chip, in such a way that the conflicts with the neighboring spots are further reduced.
 
@@ -51,7 +51,7 @@ In the next section, we review the Border Length Minimization Problem introduced
 
 \citealp{HANNENHALLI02} were the first to give a formal definition to the problem of unintended illumination in the production of microarrays. They formulated the Border Minimization Problem, which aims at finding an arrangement of the probes together with their embeddings in such a way the number of border conflicts during mask exposure steps is minimal.
 
-The \emph{border length} of a mask~$\mu_{k}$ is simply defined as the number of borders shared by masked and unmasked spots at masking step~$k$. The total border length of a given arrangement is the sum of border lengths over all masks.
+The \emph{border length} of a mask~$\m_{k}$ is simply defined as the number of borders shared by masked and unmasked spots at masking step~$k$. The total border length of a given arrangement is the sum of border lengths over all masks.
 
 \subsection{Conflict Index}
 
@@ -61,7 +61,7 @@ The \emph{border length} of a mask~$\mu_{k}$ is simply defined as the number of 
 \item[b)] imperfections produced in the middle of a probe are more harmful than in its extremities.
 \end{itemize}
 
-With these observations in mind, we define the conflict index~$\mathcal{C}(s)$ of a spot~$s$ whose probes of length~$\ell_{s}$ are synthesized in $\mu$~masking steps as follows. First we define a distance-dependent weighting function, $\delta(s,s',k)$, that accounts for observation a) above:
+With these observations in mind, we define the conflict index~$\mathcal{C}(s)$ of a spot~$s$ whose probe of length~$\ell_{s}$ is synthesized in $\mu$~masking steps as follows. First we define a distance-dependent weighting function, $\delta(s,s',k)$, that accounts for observation a) above:
 
 \begin{equation}
 \label{eq:dist_weight}
@@ -117,9 +117,7 @@ Our definition of conflict index aims at capturing the characteristics of the pr
 c = \frac{1}{\theta}.
 \end{displaymath}
 
-The distance-dependent weighthing function~$\delta$ is as suggested in \citealp{KAHNG03_1}. Our position-dependent weights~$\omega$, however, are different. Instead of using $\sqrt{\lambda(s,k)}$, we decided to use an exponential function. The reason is that the chances of a successful hybridization between a probe and its target is related to the free energy of the formed duplex, which is exponential in the number of consecutive paired bases. The range of values for both~$\delta$ and~$\omega$ of a typical Affymetrix chip are illustrated in Figure~\ref{fig:conflit_index_values}.
-
-TODO: is this right? Add reference?
+The distance-dependent weighthing function~$\delta$ is as suggested in \citealp{KAHNG03_1}. Our position-dependent weights~$\omega$, however, are different. Instead of $\sqrt{\lambda(s,k)}$, we use an exponential function. It is generally agreed that the chances of a successful hibridization between probe and target are higher if the mismatched base occurs at the extremities of the formed duplex instead of at its center. The exact effects of this position, however, is not yet fully understood and has been an active topic of research \citep{BINDER05}. The range of values for both~$\delta$ and~$\omega$ of a typical Affymetrix chip are illustrated in Figure~\ref{fig:conflit_index_values}.
 
 \begin{figure}
 % add figure
@@ -179,7 +177,7 @@ The quadratic assignment problem is a classical combinatorial optimization probl
 \end{equation}
 %%
 
-The QAP has been used to model a variety of real-life problems. One of its major applications is to model the facility location problem where $n$ facilities need to be assigned to $n$ locations. In this context, $F$ is called the \emph{flow} matrix where $f_{ij}$ represents the flow of materials from facility $i$ to facility $j$. Matrix $D$ is then called the \emph{distance} matrix where $d_{ij}$ represents the distance between locations $i$ and $j$. The permutation $\pi$ gives a one-to-one assignment of facilities to locations in such a way that the flow of materials is minimal.
+The QAP has been used to model a variety of real-life problems. One of its major applications is to model the facility location problem where $n$ facilities need to be assigned to $n$ locations. In this context, $F$ is called the \emph{flow} matrix where $f_{ij}$ represents the flow of materials from facility $i$ to facility $j$, which are assumed to have an associated cost. Matrix $D$ is called the \emph{distance} matrix where $d_{ij}$ represents the distance between locations $i$ and $j$. The permutation $\pi$ then gives a one-to-one assignment of facilities to locations with minimum cost.
 
 The microarray placement problem discussed in previous sections can be seen as an instance of a QAP. We can draw a parallel with the facility location by viewing the probes as facilities and the spots as locations. The flow matrix then contains the number of conflicts between probe embeddings whereas the distance matrix contains the distance between the spots. The exact contents of $F$ and $D$ depends whether the goal is to minimize border length or conflict index.
 
@@ -273,7 +271,7 @@ d_{ij} =
 %%
 where ``near'' means that spot~$j$ is at most three cells away from~$i$ (this accounts for the differences in range of $j$ in equations \ref{eq:qap_def} and \ref{eq:ci_min_qap}).
 
-The only remaining problem is that $\mathcal{C}_j(i)$ is defined in terms of spots $i$ and $j$, whereas $f_{ij}$ must be defined in terms of probes $i$ and $j$, independently of which spots they are assigned to. However, this is not really a problem since the dependence of~$\omega$ and~$\phi$ on the spots is a mere convenience. It does not matter the exact location of the spots, but the embeddings of their probes. Having said that, we set
+The only remaining problem is that $\mathcal{C}_j(i)$ is defined in terms of spots $i$ and $j$, whereas $f_{ij}$ must be defined in terms of probes $i$ and $j$, independently of which spots they are assigned to. However, this is not really a problem since the dependence of~$\omega$ and~$\phi$ on the spots is a mere convenience. The exact location of the spots is irrelevant; the embeddings of their probes is what matters. Having said that, we set
 %%
 \begin{equation}
 f_{ij} = \sum_{k=1}^{\mu} \omega'(i,k) \cdot \phi'(j,k),
@@ -368,6 +366,8 @@ TODO: extrapolate results to larger chips, argue that GRASP-PR is good as a fina
 \bibitem[Kahng {\it et~al}, 2003/2]{KAHNG03_2} Kahng, A.B., Mandoiu,I., Reda,S., Xu,X. and Zelikovsky,A. (2003-2), Evaluation of placement techniques for DNA probe array layout, {\it Proceedings of the IEEE/ACM International Conference on Computer-Aided Design}, 262--269.
 
 \bibitem[Oliveira {\it et~al}, 2004]{OLIVEIRA04} Oliveira,C.A.S., Pardalos,P.M. and Resende,M.G.C. (2004) GRASP with path-relinking for the quadratic assignment problem, AT\&T Labs Technical Report.
+
+\bibitem[Binder and Preibisch, 2005]{BINDER05} Binder,H. and Preibisch,S. (2005) Specific and nonspecific hybridization of oligonucleotide probes on microarrays, {\it Biophysical Journal}, {\bf 89}, 337--352.
 
 \end{thebibliography}
 \end{document}
