@@ -7,13 +7,14 @@
 \begin{document}
 \firstpage{1}
 
-\title[Quadratic assignment and microarrays]{Quadratic Assignment and the Layout of Oligonucleotide Microarrays}
-\author[S.A.de Carvalho Jr. and S.Rahmann]{S\'ergio A. de Carvalho Jr.\,$^{\rm a}$ and Sven Rahmann\,$^{\rm b}$}
+\title[Quadratic assignment and microarray design]{Quadratic Assignment and the Layout of Oligonucleotide Microarrays}
+\author[de Carvalho Jr. and Rahmann]{S\'ergio A. de Carvalho Jr.\,$^{\rm a}$ and Sven Rahmann\,$^{\rm b}$}
 \address{$^{\rm a}$Graduiertenkolleg Bioinformatik, Bielefeld University, Germany,\\$^{\rm b}$Algorithms and Statistics for Systems Biology, Genome Informatics, Bielefeld University, Germany.}
 \maketitle
 
+% ==============================================================================
 \begin{abstract}
-
+% ==============================================================================
 \section{Motivation:}
 The production of commercial DNA microarrays is based on a light-directed chemical synthesis driven by a set of masks or micromirror arrays. Due to the natural properties of light and the ever shrinking feature sizes, the arrangement of the probes on the chip and the order in which their nucleotides are synthesized play an important role on the quality of the final product. In this paper, we propose a new model for evaluating microarray layouts called \emph{conflict index}. We also describe a new approach to the design of high-density microarrays based on the \emph{quadratic assignment problem} (QAP).
 \section{Results:}
@@ -23,7 +24,9 @@ Source code is available from the authors upon request.
 \section{Contact:} \href{Sergio.Carvalho@cebitec.uni-bielefeld.de}{Sergio.Carvalho@cebitec.uni-bielefeld.de}
 \end{abstract}
 
+% ==============================================================================
 \section{Introduction}
+% ==============================================================================
 
 An oligonucleotide microarray is a piece of glass or plastic on which single-stranded fragments of DNA, called \emph{probes}, are affixed or synthesized. The chips produced by Affymetrix, for instance, can contain more than one million spots (or \emph{features}) as small as 11 $\mu$m, with each spot accommodating several million copies of a probe. Probes are typically 25 nucleotides long and are synthesized in parallel, on the chip, in a series of repetitive steps. Each step appends the same nucleotide to probes of selected regions of the chip. Selection occurs by exposure to light with the help of a photolithographic mask that allows or obstructs the passage of light accordingly \citep{FODOR91}.
 
@@ -37,7 +40,7 @@ In general, a probe can be \emph{embedded} within $\mathcal{S}$ in several ways.
 \label{fig:masking_process}
 \end{figure}
 
-Deposition sequences are usually cyclical, that is $\mathcal{S}$ is a repeated permutation of the alphabet. This is mainly because such sequences maximize the number of possible subsequences \citep{CHASE76}. In this context, we can distinguish between \emph{synchronous} and \emph{asynchronous} embeddings. In the first case, each probe has one and only one nucleotide synthesized in every cycle of the deposition sequence; hence, 100 masking steps are needed to synchronously synthesize probes of length 25. In the case of asynchronous embeddings, probes can have any number of nucleotides syntesized in any given cycle. This allows for shorter deposition sequences. Most (if not all) Affymetrix chips can be asynchronously synthesized in 74 masking steps.
+Deposition sequences are usually cyclical, that is $\mathcal{S}$ is a repeated permutation of the alphabet. This is mainly because such sequences maximize the number of possible subsequences \citep{CHASE76}. In this context, we can distinguish between \emph{synchronous} and \emph{asynchronous} embeddings. In the first case, each probe has one and only one nucleotide synthesized in every cycle of the deposition sequence; hence, 100 masking steps are needed to synchronously synthesize probes of length 25. In the case of asynchronous embeddings, probes can have any number of nucleotides syntesized in any given cycle. This allows for shorter deposition sequences. All Affymetrix chips that we know of can be asynchronously synthesized in 74 masking steps\footnote{We understand that Affymetrix uses the same truncated repetition of TGCA to synthesize all of their chips, which suggests that their probe selection only chooses probes that fit into that deposition sequence.}.
 
 Due to diffraction of light or internal reflection, untargeted spots can sometimes be accidentally activated in a certain masking step, producing unpredicted probes that can compromise the results of an experiment. This issue was described by \citealp{FODOR91}, who noted that the problem is more likely to occur near the borders between masked and unmasked spots. This observation has given rise to the term \emph{border conflict}.
 
@@ -45,15 +48,18 @@ We are interested in finding an arrangement of the probes on the chip together w
 
 If we consider all valid embeddings, the problem is even harder. A typical probe of an Affymetrix chip, for instance, can have up to several million possible embeddings. For this reason, the problem has been traditionally tackled in two phases. First, an initial embedding of the probes is fixed and an arrangement of these embeddings on the chip with minimum border conflicts is sought. This is usually refered to as the \emph{placement} problem. Second, a \emph{post-placement} optimization phase re-embeds the probes considering its location on the chip, in such a way that the conflicts with the neighboring spots are further reduced.
 
-In the next section, we review the Border Length Minimization Problem \citep{HANNENHALLI02}, and define an extended model for evaluating microarray layouts. In section \ref{sec:previous_work}, we briefly review exising placement strategies. In section \ref{sec:qap}, we propose a new approach to the design of microarrays based on the quadratic assignment problem (QAP). The results of using a QAP heuritic algorithm, called GRASP, to design small artificial chips are presented in section \ref{sec:results}, where we also compare its performance with the best known placement algorithm and describe how this approach can be used to design larger microarrays.
+In the next section, we review the Border Length Minimization Problem \citep{HANNENHALLI02}, and define an extended model for evaluating microarray layouts. In Section \ref{sec:previous_work}, we briefly review exising placement strategies. In Section \ref{sec:qap}, we propose a new approach to the design of microarrays based on the quadratic assignment problem (QAP). The results of using a QAP heuritic algorithm, called GRASP, to design small artificial chips are presented in Section \ref{sec:results}, where we also compare its performance with the best known placement algorithm and describe how this approach can be used to design larger microarrays.
 
+% ==============================================================================
 \section{Modeling}
+% ==============================================================================
 \label{sec:modelling}
 
 \citealp{HANNENHALLI02}, were the first to give a formal definition to the problem of unintended illumination in the production of microarrays. They formulated the Border Length Minimization Problem, which aims at finding an arrangement of the probes together with their embeddings in such a way the number of border conflicts during mask exposure steps is minimal.
 
 The \emph{border length} of a mask~$m_{k}$ is simply defined as the number of borders shared by masked and unmasked spots at masking step~$k$. The total border length of a given arrangement is the sum of border lengths over all masks.
 
+% ------------------------------------------------------------------------------
 \subsection{Conflict Index}
 
 \citealp{KAHNG03A}, noted that the definition of border length does not take into account two simple yet important practical considerations:
@@ -126,11 +132,14 @@ The distance-dependent weighthing function~$\delta$ is as suggested in \citealp{
 
 The definition of border length is clearly related to our definition of conflict index. However, while the first measures the quality of a mask, the latter estimates the risk of producing faulty probes at a given spot. A good layout is one with low border length as well as low average conflict index, although it is clearly possible to observe a reduction of the conflict index at the expense of an increase in border length, and vice-versa.
 
+% ==============================================================================
 \section{Previous Work}
+% ==============================================================================
 \label{sec:previous_work}
 
 In this section we review existing algorithmic techniques for designing oligonucleotide microarrays. We make a distinction between placement algorithms and partitioning algorithms. Post-placement optimizations such as the Chessboard \citep{KAHNG02} are not covered.
 
+% ------------------------------------------------------------------------------
 \subsection{Placement Algorithms}
 \label{sec:placement_alg}
 
@@ -140,7 +149,7 @@ The first to formally address the border length problem were \citealp{FELDMAN93}
 
 \citealp{KAHNG02}, proposed the epitaxial placement algorithm that places a random probe in the center of the array and continues to insert probes in spots adjacent to already filled spots, employing a greedy heuristic to select the next spot to be filled and the probe that is assigned to it.
 
-Priority is given to spots whose all four neighbors are already filled, in which case the algorithm places the probe with minimum sum of Hamming distances to its neighbors. If no such a spot exists, the algorithm examines all non-filled spots~$s_i$ with $n_i \geq 1$ filled neighbors and finds a non-assigned probe $p_j$ with minimum sum of Hamming distances to the neighboring probes $H_{ij}$. For each possible assignment of $p_j$ to $s_i$, it computes a cost $c(s_i,p_j) = k_{n_i} H_{ij} / n$, where $k_{n_i}$ are scaling coefficients ($k_1 = 1$, $k_2 = 0.8$, and $k_3 = 0.6$), and makes the assignment with minimum cost. With this algorithm, they claimed to achieve up to 10\% reduction in border conflicts over the TSP-based approach of \citealp{HANNENHALLI02}.
+Priority is given to spots whose all four neighbors are already filled, in which case the algorithm places the probe with minimum sum of Hamming distances to its neighbors. If no such a spot exists, the algorithm examines all non-filled spots~$s_i$ with $n_i \geq 1$ filled neighbors and finds a non-assigned probe $p_j$ with minimum sum of Hamming distances to the neighboring probes $H_{ij}$. For each possible assignment of $p_j$ to $s_i$, it computes a cost $c(s_i,p_j) := k_{n_i} H_{ij} / n$, where $k_{n_i}$ are scaling coefficients ($k_1 = 1$, $k_2 = 0.8$, and $k_3 = 0.6$), and makes the assignment with minimum cost. With this algorithm, they claimed to achieve up to 10\% reduction in border conflicts over the TSP-based approach of \citealp{HANNENHALLI02}.
 
 The major problem with the epitaxial and the TSP-based algorithm is that they have at least quadratic time complexity and thus are not scalable for the latest million-probe microarrays. According to their experiments, the TSP approach needed around 32 minutes to produce the layout of a 200\,x\,200 chip, whereas the epitaxial algorithm needed 74 minutes on average. For a 500\,x\,500 chip, the TSP took over 30 hours to complete, whereas the epitaxial algorithm did not complete ``due to prohibitively large running time or memory requirements'' \citep{KAHNG02}.
 
@@ -150,20 +159,25 @@ The other algorithm described by \citealp{KAHNG03A}, is a variant of the epitaxi
 
 Their experimental results showed that the row-epitaxial is the best placement algorithm in terms of solution quality, achieving up to 9\% reduction in border length when compared to the TSP-based approach of \citealp{HANNENHALLI02}. The SWM is the fastest algorithm in practice.
 
+% ------------------------------------------------------------------------------
 \subsection{Partitioning Algorithms}
 \label{sec:partition}
 
 The ever growing number of probes of the latest microarray chips and the  properties of the placement problem naturally suggest the use of partitioning strategies to reduce the running time of the algorithms.
 
-The placement problem can be trivially partitioned by dividing the set of probes into smaller sub-sets, and assigning these sub-sets to sub-regions of the chip. Each sub-region can then be treated as an independent chip or recursively partitioned. These smaller sub-problems, when solved, immediately constitute a final solution. In this way, algorithms with non-linear time or space complexities can be used compute the layout of larger chips that otherwise would not be feasible. A partitioning is clearly a compromise in solution quality. However, due to the large number of probes, this compromise can be small, specially if the partitioning is able to places similar probes together.
+The placement problem can be trivially partitioned by dividing the set of probes into smaller sub-sets, and assigning these sub-sets to sub-regions of the chip. Each sub-region can then be treated as an independent chip or recursively partitioned. These smaller sub-problems, when solved, immediately constitute a final solution. In this way, algorithms with non-linear time or space complexities can be used compute the layout of larger chips that otherwise would not be feasible. A partitioning is clearly a compromise in solution quality. However, due to the large number of probes, this compromise can be small, specially if the partitioning is able to place similar probes together.
 
-The only partitioning algorithm available in the literature is a simple recursive procedure called centroid-based quadrisection \citep{KAHNG03B}. It starts by randomly selecting a probe $c_1$ from the probe set $\mathcal{P}$. Then, it examines all other probes of $\mathcal{P}$ and selects $c_2$ with maximum $h(c_1,c_2)$, where $h(c_1,c_2)$ is the Hamming distance between the embeddings of $c_1$ and $c_2$. Similarly it finds $c_3$ with maximum $h(c_1,c_3) + h(c_2,c_3)$ and $c_4$ with maximum $h(c_1,c_4) + h(c_2,c_4) + h(c_3,c_4)$. Probes $c_1$, $c_2$, $c_3$ and $c_4$ are called centroids. All other probes $p_i \in \mathcal{P}$ are then compared to the centroids and assigned to the sub-set $\mathcal{P}_j$ associated with centroid $c_j$ that has minimum $h(p_i,c_j)$. Each sub-set $\mathcal{P}_j$ is assigned to a sub-region of the chip. The procedure is repeated recursively on each sub-region until a given maximum recursion depth $L$ is reached.
+The only partitioning algorithm available in the literature is the centroid-based quadrisection \citep{KAHNG03B}. It is a recursive procedure that works as follows. First, it randomly selects a probe $c_1$ from the probe set $\mathcal{P}$. Then, it examines all other probes of $\mathcal{P}$ and selects $c_2$ with maximum $h(c_1,c_2)$, where $h(c_1,c_2)$ is the Hamming distance between the embeddings of $c_1$ and $c_2$. Similarly it finds $c_3$ with maximum $h(c_1,c_3) + h(c_2,c_3)$ and $c_4$ with maximum $h(c_1,c_4) + h(c_2,c_4) + h(c_3,c_4)$. Probes $c_1$, $c_2$, $c_3$ and $c_4$ are called centroids. All other probes $p_i \in \mathcal{P}$ are then compared to the centroids and assigned to the sub-set $\mathcal{P}_j$ associated with $c_j$ with minimum $h(p_i,c_j)$. Each sub-set $\mathcal{P}_j$ is assigned to a sub-region of the chip. The procedure is repeated recursively on each sub-region until a given maximum recursion depth $L$ is reached.
 
-The result of this algorithm is a partitioning of the chip into several sub-regions and an assignment of sub-sets of $\mathcal{P}$ to each sub-region. For the actual placement of the probes in each sub-region, another placement algorithm is needed. For this purpose, \citealp{KAHNG03B}, have used the row-epitaxial algorithm.
+The result of this algorithm is a partitioning of the chip into several sub-regions and an assignment of sub-sets of $\mathcal{P}$ to each sub-region. For the actual placement of the probes in each sub-region, another algorithm is needed. For this purpose, \citealp{KAHNG03B}, have used the row-epitaxial algorithm.
 
-The results presented in \citealp{KAHNG03B}, shows that the running time of the row-epitaxial algorithm drops significantly with increasing $L$. The time required to place the probes of a 500\,x\,500 chip, for instance, droped by 69\% with $L = 3$ when compared with the time required by the row-epitaxial algorithm. It is not clear from their experiments, however, how the choice of $L$ impaired the performance of the row-epitaxial algorithm in terms of solution quality.
+The results presented in \citealp{KAHNG03B}, show that the running time of the row-epitaxial algorithm drops significantly with increasing $L$. The time required to place the probes of a 500\,x\,500 chip, for instance, droped by 69\% with $L = 3$ when compared with the time required by the row-epitaxial without any partitioning.
 
+It is not clear from their experiments, however, how the choice of $L$ impaired the performance of the row-epitaxial algorithm in terms of solution quality since they have restricted their experiments to $L \leq 3$. Moreover, there is no clear trend toward reduction or increase in border length as $L$ varies from~0 to~3.
+
+% ==============================================================================
 \section{Quadratic Assignment Problem}
+% ==============================================================================
 \label{sec:qap}
 
 We now explore a different approach to the design of microarrays based on the quadratic assignment problem (QAP), a classical combinatorial optimization problem introduced by \citealp{KOOPMANS57}.
@@ -176,27 +190,28 @@ The QAP can be formally stated as follows. Given~$n \times n$ matrices $F = (f_{
 \end{equation}
 %%
 
-The QAP has been used to model a variety of real-life problems. One of its major applications is to model the facility location problem where $n$ facilities have to be assigned to $n$ locations. In this scenario, $F$ is called the flow matrix and $f_{ij}$ represents the flow of materials from facility $i$ to facility $j$, which are assumed to have an associated cost proportional to the distance between the facilities. Matrix $D$ is called the distance matrix and $d_{ij}$ represents the distance between locations $i$ and $j$. The permutation $\pi$ then gives a one-to-one assignment of facilities to locations with minimum cost.
+The QAP has been used to model a variety of real-life problems. One of its major applications is to model the facility location problem where $n$ facilities must be assigned to $n$ locations. In this scenario, $F$ is called the flow matrix as $f_{ij}$ represents the flow of materials from facility $i$ to facility $j$, which are assumed to have an associated cost proportional to the distance between the facilities. Matrix $D$ is called the distance matrix as $d_{ij}$ gives the distance between locations $i$ and $j$. The permutation $\pi$ defines a one-to-one assignment of facilities to locations with minimum cost.
 
+% ------------------------------------------------------------------------------
 \subsection{Quadratic Assignment Formulations}
 \label{sec:qap_form}
 
-The microarray placement problem discussed in previous sections can be seen as an instance of a QAP. We can draw a parallel with the facility location by viewing the probes as facilities and the spots as locations. The flow matrix then contains the number of conflicts between probe embeddings whereas the distance matrix contains the distance between the spots. The exact contents of $F$ and $D$ depends whether the goal is to minimize border length or conflict index.
+The microarray placement problem discussed in previous sections can be seen as an instance of a QAP. We can use the facility location example by viewing the probes as facilities and the spots as locations. The flow matrix then contains the number of conflicts between probe embeddings whereas the distance matrix gives the distance between the spots.
 
-In the following formulations, we consider the probes as having a single pre-defined embedding in order to force a one-to-one relationship. A more elaborate formulation would consider all possible embeddings of a probe but, then, it would be necessary to ensure that only one embedding of a probe is assigned to a spot.
+The exact contents of $F$ and $D$ depends whether the goal is to minimize border length or conflict index. In the following formulations, we consider the probes as having a single pre-defined embedding in order to force a one-to-one relationship. A more elaborate formulation would consider all possible embeddings of a probe but, then, it would be necessary to ensure that only one embedding of a probe is assigned to a spot.
 
 \subsubsection{Border Length Minimization}
 
 The QAP formulation for the case of border length minimization is trivial. We set
 %%
 \begin{equation}
-f_{ij} = \frac{h(p_i, p_j)}{2}
+f_{ij} := \frac{h(p_i, p_j)}{2}
 \end{equation}
 %%
-where $h(p_i, p_j)$ is the Hamming distance between the embeddings of probes $p_i$ and $p_j$. We need to divide it by two because in equation \ref{eq:qap_def}, the conflicts between $p_i$ and $p_j$ appears twice (in $f_{ij}$ and $f_{ji}$). For the distance matrix, we set
+where $h(p_i, p_j)$ is the Hamming distance between the embeddings of probes $p_i$ and $p_j$. We divide it by since, in (\ref{eq:qap_def}), the conflicts between $p_i$ and $p_j$ appears twice (in $f_{ij}$ and $f_{ji}$). For the distance matrix, we set
 %%
 \begin{equation}
-d_{ij} =
+d_{ij} :=
 	\left\{
 		\begin{array}{ll}
 			1 & \mbox{if spots $i$ and $j$ are adjacent}, \\
@@ -209,36 +224,36 @@ since only conflicts between adjacent spots are relevant for the border length. 
 
 \subsubsection{Conflict Index Minimization}
 
-In case of conflict index minimization, the formulation is slightly more elaborate. Our goal is to design a microarray minimizing the sum of conflict indices over all spots $i$
+In case of conflict index minimization, the formulation is slightly more elaborate. Our goal is to design a microarray minimizing the sum of conflict indices over all spots $i$, that is
 %%
 \begin{equation}
 \label{eq:ci_min}
 \sum_{i} \mathcal{C}(i).
 \end{equation}
 
-From the point of view of a spot~$i$, there is a conflict at step~$k$ only when $i$ is masked and a close neighbor~$j$ is unmasked, in which case we say that there is an induced conflict of~$j$ onto~$i$, $\mathcal{C}_{j}(i)$, that can be derived from equation \ref{eq:conf_idx} as
+From the point of view of a spot~$i$, there is a conflict at step~$k$ only when $i$ is masked and a close neighbor~$j$ is unmasked, in which case we say that there is an induced conflict of~$j$ onto~$i$, $\mathcal{C}_{j}(i)$, that can be derived from Equation (\ref{eq:conf_idx}) as
 %%
 \begin{equation}
 \label{eq:induced_conf_idx}
 \mathcal{C}_{j}(i) := \sum_{k=1}^{\mu} \omega(i,k) \cdot \delta(i,j,k).
 \end{equation}
 
-We can then rewrite equation \ref{eq:conf_idx} as
+We can then rewrite (\ref{eq:conf_idx}) as
 %%
 \begin{equation}
 \mathcal{C}(i) := \sum_{j} \mathcal{C}_{j}(i),
 \end{equation}
 %%
-and our problem stated in equation \ref{eq:ci_min} turns into minimizing
+and our objective function (\ref{eq:ci_min}) turns into
 %%
 \begin{equation}
 \label{eq:ci_min_qap}
 \sum_{i} \sum_{j} \mathcal{C}_{j}(i),
 \end{equation}
 %%
-where $j$ ranges over all spots that are at most three cells away from $i$.
+where $j$ ranges over all neighbors that are at most three spots away from $i$.
 
-Equations \ref{eq:qap_def} and \ref{eq:ci_min_qap} are conveniently similar. Now we just need to set $f_{ij}$ and $d_{ij}$ in such a way that their multiplication results in $\mathcal{C}_{j}(i)$. The dependence of $\delta$ on $k$ is due to the fact that $\delta(i,j,k) = 0$ if spot~$j$ is masked at step $k$. It is thus possible to rewrite equation \ref{eq:induced_conf_idx} as
+Note the similarities between (\ref{eq:qap_def}) and (\ref{eq:ci_min_qap}). Now we need to set $f_{ij}$ and $d_{ij}$ in such a way that their multiplication results in $\mathcal{C}_{j}(i)$. The dependence of $\delta$ on $k$ is due to the fact that $\delta(i,j,k) = 0$ if spot~$j$ is masked at step $k$. It is thus possible to rewrite Equation (\ref{eq:induced_conf_idx}) as
 %%
 \begin{equation}
 \label{eq:induced_conf_idx_2}
@@ -257,12 +272,12 @@ where
         \right.
 \end{equation}
 %%
-and $d(i,j)$ is the Euclidean distance between spots~$i$ and~$j$ as used in the definition of $\delta$ (equation \ref{eq:dist_weight}).
+and $d(i,j)$ is the Euclidean distance between spots~$i$ and~$j$ as used in (\ref{eq:dist_weight}).
 
-Looking at equation \ref{eq:induced_conf_idx_2}, we can already see how $f_{ij}$ and $d_{ij}$ can be set to produce $\mathcal{C}_j(i)$. The latter is easy:
+Equation (\ref{eq:induced_conf_idx_2}) suggests how $f_{ij}$ and $d_{ij}$ can be set to produce $\mathcal{C}_j(i)$. The latter is trivial:
 %%
 \begin{equation}
-d_{ij} =
+d_{ij} :=
 	\left\{
                 \begin{array}{ll}
                         (d(i,j))^{-2} & \mbox{if spot $j$ is ``near'' spot $i$}, \\
@@ -271,12 +286,12 @@ d_{ij} =
 	\right.
 \end{equation}
 %%
-where ``near'' means that spot~$j$ is at most three cells away from~$i$ (this accounts for the differences in range of $j$ in equations \ref{eq:qap_def} and \ref{eq:ci_min_qap}).
+where ``near'' means that spot~$j$ is at most three cells away from~$i$. This definition also accounts for the difference in range of $j$ in (\ref{eq:qap_def}) and (\ref{eq:ci_min_qap}).
 
-The only remaining problem is that $\mathcal{C}_j(i)$ is defined in terms of spots $i$ and $j$, whereas $f_{ij}$ must be defined in terms of probes $i$ and $j$, independently of which spots they are assigned to. However, this is not really a problem since the dependence of~$\omega$ and~$\phi$ on the spots is a mere convenience. The exact location of the spots is irrelevant; the embeddings of their probes is what matters. Having said that, we set
+The only remaining problem is that $\mathcal{C}_j(i)$ is defined in terms of spots $i$ and $j$, whereas $f_{ij}$ must be defined in terms of probes $i$ and $j$, independently of which spots they are assigned to. However, the dependence of~$\omega$ and~$\phi$ on the spots is a mere convenience since the exact location of the spots is irrelevant. The embeddings of their probes is what matters. Hence, we set
 %%
 \begin{equation}
-f_{ij} = \sum_{k=1}^{\mu} \omega'(i,k) \cdot \phi'(j,k),
+f_{ij} := \sum_{k=1}^{\mu} \omega'(i,k) \cdot \phi'(j,k),
 \end{equation}
 %%
 where
@@ -303,13 +318,14 @@ where
 %%
 $c$ and $\theta$ are constants, $\ell'_i$ is the length of probe $i$, and $b'_{i,k}$ denotes the number of nucleotides of probe~$i$ synthesized up to and including step~$k$.
 
+% ------------------------------------------------------------------------------
 \subsection{QAP Heuristics}
 
 In the previous sub-section we showed how the microarray placement problem can be modeled as a quadratic assignment problem. This is interesting because we can now use existing QAP algorithms to design the layout of microarrays minimizing either the sum of border lengths or conflict indices. 
 
-The QAP is known to be NP-hard and NP-hard to approximate, and instances of size larger than $n = 20$ are generally considered to be impossible to solve (to optimallity). Fortunately, several heuristics are available including approaches based on tabu search, simulated annealing and genetic algorithms \citep{CELA98}.
+The QAP is known to be NP-hard and NP-hard to approximate, and instances of size larger than $n = 20$ are generally considered to be impossible to solve (to optimallity). Fortunately, several heuristics are available including approaches based on tabu search, simulated annealing and genetic algorithms (see \citealp{CELA98} for a survey).
 
-Another interesting heuristic approach is GRASP (greedy randomized adaptive search procedure), proposed by \citealp{FEO95}, and used by \citealp{LI94}, for solving QAP instances.
+One interesting heuristic approach is GRASP (greedy randomized adaptive search procedure), proposed by \citealp{FEO95} and used by \citealp{LI94} for solving QAP instances.
 
 We also outline a GRASP variant known as GRASP with path-relinking \citep{OLIVEIRA04} that we have used to design the layout of microarray chips.
 
@@ -317,75 +333,63 @@ GRASP ...
 
 GRASP with path-relinking (GRASP-PR)...
 
+% ==============================================================================
 \section{Results And Discussion}
+% ==============================================================================
 \label{sec:results}
 
 We now present experimental results of using GRASP with path-relinking (GRASP-PR) for designing the layout of small artificial chips.
 
-Due to the large number of probes on industrial microarrays, it is not feasible to use GRASP-PR (or any other QAP method) to design the layout of an entire microarray chip. However, it is certainly possible to use it on small sub-regions of a chip. This is interesting because we can combine GRASP-PR with a partitioning strategy such as the centroid-based quadrisection described in section \ref{sec:partition}.
+Due to the large number of probes on industrial microarrays, it is not feasible to use GRASP-PR (or any other QAP method) to design the layout of an entire microarray chip. However, it is certainly possible to use it on small sub-regions of a chip. This is interesting because we can combine GRASP-PR with a partitioning strategy such as the centroid-based quadrisection described in Section \ref{sec:partition}.
 
-We have run GRASP-PR as well as the best know placement algorithm, row-epitaxial (see section \ref{sec:placement_alg}), on several small random chips. For GRASP-PR, we used a C implementation provided by \citealp{OLIVEIRA04}, with default parameters: 32 iterations, $\alpha=0.1$, $\beta=0.5$, and elite set with size $\mid P\mid = 10$. Their main routine takes three arguments: matrices $F$ and $D$ and the dimension of the problem~$n$ (in our case, the number of spots or probes). We generated the matrices using the formulations presented in section \ref{sec:qap_form}. For the row-epitaxial algorithm we used a C implementation provided by \citealp{KAHNG03A}. The running times and the border length of the resulting layouts are shown on table \ref{tab:graspr_reptx}. Experiments were conducted on a Sun Fire V1280 server with 12 UltraSparc III+ processors with 900Mhz and 96 Gb of RAM under similar load balances.
+We have run GRASP-PR as well as the best know placement algorithm, row-epitaxial (see Section \ref{sec:placement_alg}), on several small random chips. For GRASP-PR, we used a C implementation provided by \citealp{OLIVEIRA04}, with default parameters: 32 iterations, $\alpha=0.1$, $\beta=0.5$, and elite set with size $\mid P\mid = 10$. The main routine takes three arguments: matrices $F$ and $D$ and the dimension of the problem~$n$ (in our case, the number of spots or probes). We generated the matrices using the formulations presented in Section \ref{sec:qap_form}. For the row-epitaxial algorithm we used a C implementation provided by \citealp{KAHNG03A}. The running times and the border length of the resulting layouts are shown on Table \ref{tab:graspr_reptx}.
 
 \begin{table*}[t]
-\processtable{Border length of layouts produced by row-epitaxial and GRASP-PR on chips with random probes of length 25 synchronously embedded. Reduction in border conflicts are reported in percentage compared to the initial layout.\label{tab:graspr_reptx}}
+\processtable{Border length of random chips compared with the layouts produced by row-epitaxial and GRASP with path-relinking. Reductions in border length are reported in percentages compared to the initial layout. Chips contain 25-base long probes uniformly generated and synchronously embedded. Border length and running times are averages over a set of five chips.\label{tab:graspr_reptx}}
 {\begin{tabular}{crrcrrrcrrr} \toprule
-          &            & random & & \multicolumn{3}{c}{row-epitaxial}  & & \multicolumn{3}{c}{GRASP-PR}  \\ \cline{3-3} \cline{5-7} \cline{9-11}
-chip      & number of  & border & & border & reduction & time          & & border & reduction & time   \\
+          &            & Random & & \multicolumn{3}{c}{Row-epitaxial}  & & \multicolumn{3}{c}{GRASP with path-relinking}  \\ \cline{3-3} \cline{5-7} \cline{9-11}
+Chip      & Number of  & Border & & Border & Reduction & Time          & & Border & Reduction & Time   \\
 dimension & probes     & length & & length & (\%)      & (sec.)        & & length & (\%)      & (sec.) \\ \midrule
-6\,x\,6 & 36 & 2\,242.4 & & 1\,952.4 & 12.93 & 3.2 & & 1\,896.4 & 15.43 & 3.5 \\
-7\,x\,7 & 49 & & & & & & & & & \\
-8\,x\,8 & 64 & & & & & & & & & \\
-9\,x\,9 & 81 & & & & & & & & & \\
-10\,x\,10 & 100 & 6\,684.8 & & 5\,562.8 & 16.78 & 8.7 & & 5\,522.8 & 17.38 & 33.5 \\
-11\,x\,11 & 121 & & & & & & & & & \\
-12\,x\,12 & 144 & & & & & & & & & \\ \botrule
-\end{tabular}}{Border length in each case are averages over a set of five chips; running times are averages over three runs for each chip of a set.}
+
+6\,x\,6   &  36 & 2\,239.20 & & 1\,942.40 & 13.25 & 0.010 & & 1\,882.40 & 15.93 & 2.991   \\
+7\,x\,7   &  49 & 3\,115.20 & & 2\,675.60 & 14.11 & 0.020 & & 2\,621.60 & 15.84 & 7.074   \\
+8\,x\,8   &  64 & 4\,202.40 & & 3\,514.00 & 16.38 & 0.024 & & 3\,481.20 & 17.16 & 13.568  \\
+9\,x\,9   &  81 & 5\,420.00 & & 4\,471.20 & 17.51 & 0.028 & & 4\,460.40 & 17.70 & 28.076  \\
+10\,x\,10 & 100 & 6\,740.40 & & 5\,556.20 & 17.57 & 0.034 & & 5\,536.00 & 17.87 & 55.430  \\
+11\,x\,11 & 121 & 8\,212.00 & & 6\,726.80 & 18.09 & 0.040 & & 6\,734.80 & 17.99 & 84.659  \\
+12\,x\,12 & 144 & 9\,872.00 & & 7\,975.20 & 19.21 & 0.044 & & 8\,038.00 & 18.58 & 148.196 \\ \botrule
+\end{tabular}}{Experiments were conducted on a Sun Fire V1280 server with 900Mhz UltraSparc III+ processors and 96 Gb of RAM under similar load balances.}
 \end{table*}
 
-Our results show that GRASP-PR produces layouts with lower border lengths than those produced by the row-epitaxial algorithm for small chips, although its running time increases at a much higher rate with larger chip sizes.
+Our results show that GRASP-PR produces layouts with lower border lengths than the row-epitaxial algorithm for the smaller chips. For 6\,x\,6 chips GRASP-PR outperforms row-epitaxial by $2.5$ percentage points on average when compared to the initial random layout. This is a promising result given that GRASP-PR is a general QAP heuristic. For 10\,x\,10 chips, however, this difference drops to $0.6$ percentage point. The row-epitaxial generates better layouts for 11\,x\,11 or larger chips. This is probably because a larger chip means that there are more probes to choose from when filling the spots.
 
-TODO: analyze trend: with increasing sizes, row-epitaxial gets better, GRASP-PR gets worse. Consider that GRASP-PR is a general QAP heuristic.
+In terms of running time, the row-epitaxial is faster and shows little variation as the number of probes grows. In contrast, the time required to compute a layout with GRASP-PR increases at a fast rate.
 
-It is also clear that the rate of improvement of GRASP-PR over row-epitaxial is higher on smaller chips. On a 6\,x\,6 chip GRASP-PR outperforms row-epitaxial by $2.5$ percentage points when compared to the initial random layout. On a 10\,x\,10 chip, this difference drops to $0.6$ percentage point.
+It is interesting to extrapolate the times shown on Table~\ref{tab:graspr_reptx} to predict the total time that would be required to design the layout of commercial microarrays, if we were to combine GRASP-PR with a partitioning algorithm. If the partitioning produced 6\,x\,6 regions, 37\,636 sub-regions would be created from the 1164\,x\,1164 Affymetrix Human Genome U133 Plus 2.0 GeneChip\raisebox{.6ex}{\scriptsize \textregistered}, one of the largest Affymetrix chips. Since each sub-region takes around 3 seconds to compute with GRASP-PR, the total time required for designing such a chip would be a little over 31 hours (ignoring the time for the partitioning itself).
 
-It is interesting to extrapolate the times shown on table~\ref{tab:graspr_reptx} to predict the total time that would be required to design the layout of larger chips, if we were to combine GRASP-PR with a partitioning algorithm. If the partitioning produced 10\,x\,10 regions, 13\,689 sub-regions would be created from the 1164\,x\,1164 Affymetrix Human Genome U133 Plus 2.0 GeneChip\raisebox{.6ex}{\scriptsize \textregistered}, one of the largest Affymetrix chips. Since each sub-region takes around 30 seconds to compute with GRASP-PR, the total time required for designing such a chip would be a little less than two hours (ignoring the time for the partitioning itself).
-
-If the partitioning produced 12\,x\,12 regions, 9\,409 sub-regions would be created and, since GRASP-PR takes around 3 minutes to compute each of them, the total time would be more than 19 days. This is probably prohibitive, although it is certainly possible to reduce the time of each GRASP-PR execution by running it on faster machines or using a parallel implementation (GRASP is known to be easily parallelized; see \citealp{LI94}). Figure~\ref{fig:time_extrapolation} shows similar predictions based on our results with varying chip dimensions and partitioning sizes.
+If the partitioning produced 12\,x\,12 regions, 9\,409 sub-regions would be created and, at 2.4 minutes each, the total time would be more than 16 days. This is probably prohibitive (and senseless since row-epitaxial is producing better layouts), although it is certainly possible to reduce the time of each GRASP-PR execution by running it on faster machines or using a parallel implementation (GRASP is known to be easily parallelized; see \citealp{LI94}). Figure~\ref{fig:time_extrapolation} shows similar predictions based on our results with varying chip dimensions and partitioning sizes.
 
 \begin{figure}
 %\centerline{\includegraphics{fig01.eps}}
 \caption{Predicted time to compute the layout of large microarrays using a partitioning algorithm and GRASP-PR on the resulting sub-regions. Each curve represents a chip with the dimension of an existing GeneChip array (example in parentheses). The maximum dimension of sub-regions produced by the partitioning is shown on the horizontal axis. The time required for the partitioning itself is ignored.}\label{fig:time_extrapolation}
 \end{figure}
 
-We believe that solution quality is more important than the running time of a placement algorithm. Even if an algorithm takes a couple of days to complete, it is time well spent given that commercial microarrays are likely to be produced in large scale. This is specially true when we consider the time required for the whole design process of a microarray chip. Even customer designed chips that usually have a limited number of produced units are likely to benefit from a few extra hours of computing time.
+We believe that solution quality is more important than the running time of a placement algorithm. Even if an algorithm takes a couple of days to complete, it is time well spent given that commercial microarrays are likely to be produced in large scale. This is specially true when we consider the time required for the whole design process of a microarray chip. Even customer designed chips, that usually have a limited number of produced units, are likely to benefit from a few extra hours of computing time.
 
+% ------------------------------------------------------------------------------
 \subsection{Future Work}
 
-As mentioned in section \ref{sec:partition}, partitioning is a compromise in solution quality in favour of running time. However, it is not clear yet how the choice of the maximum recursion depth in the centroid-based quadrisection can undermine the effectiveness of the placement algorithms. At the moment, we are investigating alternative partitioning strategies and evaluating their effects on the quality of the solutions.
+As mentioned earlier, partitioning is a compromise in solution quality in favour of running time. However, it is not clear yet how the choice of the maximum recursion depth in the centroid-based quadrisection can undermine the effectiveness of the placement algorithms. At the moment, we are investigating alternative partitioning strategies and evaluating their effects on the quality of the solutions.
 
-We conclude by noting that QAP heuristics such as GRASP-PR could also be used to improve existing layouts if small changes were made introduced. The idea is to run such algorithms iteratively in a sliding-window fashion. Each iteration produces an instance of a QAP whose size equals the size of the window and the QAP heuristic can be executed to check whether conflicts can be reduced with a new layout.
+We conclude by noting that QAP heuristics such as GRASP-PR could also be used to improve existing layouts if small changes were introduced. The idea is that we can run such algorithms iteratively in a sliding-window fashion, where each iteration produces an instance of a QAP whose size equals the size of the window. The QAP heuristic can then be executed to check whether a different arrangement of the probes inside the window can reduce the conflicts.
 
-The only problem with this approach is that the QAP heuristic needs to take into account not only the costs due to the iteractions inside the window, but also those due to the spots around the window. Otherwise, it is likely that a reduction in conflicts inside the window is achieved at the expense of an increase on the borders of the window.
+The only problem with this approach is that the QAP heuristic also needs to take into account the conflicts due to the spots around the window. Otherwise, the new layout may increase the conflicts on the borders of the window.
 
-A possible change to the QAP heuristics would be to solve a larger QAP instance consisting of the spots inside the window as well as those around it. The difference is that the contents of the spots outside the window would have to be fixed, that is, the elements of the permutation $\pi$ corresponding to these spots would be always the same.
+A possible solution to this problem is to solve a larger QAP instance consisting of the spots inside the window as well as those around it. The spots outside the window obviously must remain unchanged, and that can be done by fixing the corresponding elements of the permutation $\pi$. Note also that there is no need to compute $d_{ij}$ if spots $i$ and $j$ are both outside the window, nor $f_{ij}$ if probes $i$ and $j$ are assigned to spots outside the window.
 
-\begin{table}[t]
-\processtable{Average conflict index of layouts produced by GRASP-PR on chips with random probes of length 25 synchronously embedded. Reduction in border conflicts are reported in percentage compared to the initial layout.\label{tab:graspr_ci}}
-{\begin{tabular}{crrcrrrcrrr} \toprule
-          &            & random    & & \multicolumn{3}{c}{GRASP-PR}  \\ \cline{3-3} \cline{5-7}
-chip      & number of  & avg.      & & avg.       & reduction & time   \\
-dimension & probes     & conf.idx. & & conf. idx. & (\%)      & (sec.) \\ \midrule
-6\,x\,6 & 36 & 2\,242.4 & & 1\,896.4 & 15.43 & 3.5 \\
-7\,x\,7 & 49 & & & & & \\
-8\,x\,8 & 64 & & & & & \\
-9\,x\,9 & 81 & & & & & \\
-10\,x\,10 & 100 & 6\,684.8 & & 5\,522.8 & 17.38 & 33.5 \\
-11\,x\,11 & 121 & & & & & \\
-12\,x\,12 & 144 & & & & & \\ \botrule
-\end{tabular}}{Average conflict index in each case are averages over a set of five chips; running times are averages over three runs for each chip of a set.}
-\end{table}
-
+% ==============================================================================
 \begin{thebibliography}{}
+% ==============================================================================
 
 \bibitem[Binder and Preibisch, 2005]{BINDER05} Binder,H. and Preibisch,S. (2005) Specific and nonspecific hybridization of oligonucleotide probes on microarrays. {\it Biophysical Journal}, {\bf 89}, 337--352.
 
@@ -403,9 +407,9 @@ dimension & probes     & conf.idx. & & conf. idx. & (\%)      & (sec.) \\ \midru
 
 \bibitem[Kahng {\it et~al}., 2002]{KAHNG02} Kahng,A.B., Mandoiu,I.I., Pevzner,P.A., Reda,S. and Zelikovsky,A.Z. (2002) Border length minimization in DNA array design. In {\it Proceedings of the Second Workshop on Algorithms in Bioinformatics}.
 
-\bibitem[Kahng {\it et~al}., 2003a]{KAHNG03A} Kahng,A.B., Mandoiu,I., Pevzner,P., Reda,S. and Zelikovsky,A. (2003-1) Engineering a scalable placement heuristic for DNA probe arrays. In {\it Proceedings of the Seventh Annual International Conference on Computational Molecular Biology}, 148--83.
+\bibitem[Kahng {\it et~al}., 2003a]{KAHNG03A} Kahng,A.B., Mandoiu,I., Pevzner,P., Reda,S. and Zelikovsky,A. (2003a) Engineering a scalable placement heuristic for DNA probe arrays. In {\it Proceedings of the Seventh Annual International Conference on Computational Molecular Biology}, 148--83.
 
-\bibitem[Kahng {\it et~al}., 2003b]{KAHNG03B} Kahng, A.B., Mandoiu,I., Reda,S., Xu,X. and Zelikovsky,A. (2003-2), Evaluation of placement techniques for DNA probe array layout. In {\it Proceedings of the IEEE/ACM International Conference on Computer-Aided Design}, 262--269.
+\bibitem[Kahng {\it et~al}., 2003b]{KAHNG03B} Kahng, A.B., Mandoiu,I., Reda,S., Xu,X. and Zelikovsky,A. (2003b), Evaluation of placement techniques for DNA probe array layout. In {\it Proceedings of the IEEE/ACM International Conference on Computer-Aided Design}, 262--269.
 
 \bibitem[Koopmans and Beckmann, 1957]{KOOPMANS57} Koopmans,T.C. and Beckmann,M.J. (1957) Assignment problems and the location of economic activities. {\it Econometrica}, {\bf 25}, 53--76.
 
