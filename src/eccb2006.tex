@@ -3,6 +3,7 @@
 \pubyear{2006}
 
 \usepackage[english]{babel}
+\usepackage{graphicx}
 
 \begin{document}
 \firstpage{1}
@@ -119,14 +120,39 @@ Our definition of conflict index aims at capturing the characteristics of the pr
 \end{displaymath}
 %%
 \begin{displaymath}
-c = \frac{1}{\theta}.
+c = \frac{1}{\exp{\theta}}.
 \end{displaymath}
 
 The distance-dependent weighthing function~$\delta$ is as suggested in \citealp{KAHNG03A}. Our position-dependent weights~$\omega$, however, are different. Instead of $\sqrt{\lambda(s,k)}$, we use an exponential function. It is generally agreed that the chances of a successful hibridization between probe and target are higher if a mismatched base occurs at the extremities of the formed duplex instead of at its center. The precise effects of this position, however, is not yet fully understood and has been an active topic of research \citep{BINDER05}. The range of values for both~$\delta$ and~$\omega$ of a typical Affymetrix chip are illustrated in Figure~\ref{fig:conflit_index_values}.
 
 \begin{figure}
-% add figure
-\caption{Range of values for both $\delta$ and $\omega$ on a typical Affymetrix chip where probes of length~$\ell = 25$ are synthesized in $\mu = 74$~masking steps. a) Distance-dependent weighthing function $\delta$; b) position-dependent weights $\omega$.}
+%%
+\footnotesize{ \centerline{
+\begin{tabular}{c|c|c|c|c|c|c|c|} \cline{2-8}
+   & 0.06 & 0.08 & 0.10 & 0.11 & 0.10 & 0.08 & 0.06 \\ \cline{2-8}
+   & 0.08 & 0.13 & 0.20 & 0.25 & 0.20 & 0.13 & 0.08 \\ \cline{2-8}
+   & 0.10 & 0.20 & 0.50 & 1.00 & 0.50 & 0.20 & 0.10 \\ \cline{2-8}
+a) & 0.11 & 0.25 & 1.00 &  s   & 1.00 & 0.25 & 0.11 \\ \cline{2-8}
+   & 0.10 & 0.20 & 0.50 & 1.00 & 0.50 & 0.20 & 0.10 \\ \cline{2-8}
+   & 0.08 & 0.13 & 0.20 & 0.25 & 0.20 & 0.13 & 0.08 \\ \cline{2-8}
+   & 0.06 & 0.08 & 0.10 & 0.11 & 0.10 & 0.08 & 0.06 \\ \cline{2-8}
+\end{tabular}
+}}
+%%
+\footnotesize{ \centerline{
+%%
+\begin{picture}(415,165)
+\put(0,123){a)}
+\put(0,41){b)}
+\put(15,0){\makebox(395,165){
+\input{position_weights}
+}}
+% \includegraphics*[0mm,0mm][128mm,65mm]{division}
+\end{picture}
+%%
+}}
+%%
+\caption{Ranges of values for both $\delta$ and $\omega$ on a typical Affymetrix chip where probes of length~$\ell = 25$ are synthesized in $\mu = 74$ masking steps. a) Distance-dependent weighthing function $\delta(s,s',k)$ for a spot~$s$ (shown in the center) and all close neighbors $s'$, assuming that $s$ is masked and $s'$ is unmasked at step $k$. b) Position-dependent weights $\omega(s,k)$ at each value of $b_{s,k}$, assumming that spot $s$ is masked at step $k$.}
 \label{fig:conflit_index_values}
 \end{figure}
 
@@ -323,15 +349,46 @@ $c$ and $\theta$ are constants, $\ell'_i$ is the length of probe $i$, and $b'_{i
 
 In the previous sub-section we showed how the microarray placement problem can be modeled as a quadratic assignment problem. This is interesting because we can now use existing QAP algorithms to design the layout of microarrays minimizing either the sum of border lengths or conflict indices. 
 
-The QAP is known to be NP-hard and NP-hard to approximate, and instances of size larger than $n = 20$ are generally considered to be impossible to solve (to optimallity). Fortunately, several heuristics are available including approaches based on tabu search, simulated annealing and genetic algorithms (see \citealp{CELA98} for a survey).
+The QAP is known to be NP-hard and NP-hard to approximate. Instances of size larger than $n = 20$ are generally considered to be impossible to solve (to optimallity). Fortunately, several heuristics are available including approaches based on tabu search, simulated annealing and genetic algorithms (see \citealp{CELA98}, for a survey).
 
-One interesting heuristic approach is GRASP (greedy randomized adaptive search procedure), proposed by \citealp{FEO95} and used by \citealp{LI94} for solving QAP instances.
+We now briefly describe GRASP, a heuristic proposed by \citealp{FEO95}, which was first used for solving the QAP by \citealp{LI94}. We also outline a GRASP variant known as GRASP with path-relinking \citep{OLIVEIRA04} that we have used in the design of microarray chips. In the description that follows we use the terms of the facility location problem: $f_{ij}$ is the flow between facilities $i$ and $j$, $d_{kl}$ is the distance between locations $i$ and $j$.
 
-We also outline a GRASP variant known as GRASP with path-relinking \citep{OLIVEIRA04} that we have used to design the layout of microarray chips.
+GRASP is an acronym for Greedy Randomized Adaptive Search Procedure. It is an iterative process comprised of two phases: a construction phase where it builds a random feasible solution, and a local search phase where it seeks a local optimum in the neighborhood of that solution.
 
-GRASP ...
+Before the first iteration, GRASP sorts the $(n^2 - n)$ elements of the distance matrix in increasing order, keeping the first $\lfloor \beta (n^2 - n) \rfloor$:
+%%
+\begin{displaymath}
+d_{k_1 l_1} \le d_{k_2 l_2} \le \cdots \le d_{k_{\lfloor \beta (n^2 - n) \rfloor} l_{\lfloor \beta (n^2 - n) \rfloor}},
+\end{displaymath}
+%%
+where $0 < \beta < 1$ is a restriction parameter. It also sorts the $(n^2 - n)$ elements of the flow matrix in decreasing order, again keeping the first $\lfloor \beta (n^2 - n) \rfloor$:
+%%
+\begin{displaymath}
+f_{i_1 j_1} \ge f_{i_2 j_2} \ge \cdots \ge f_{i_{\lfloor \beta (n^2 - n) \rfloor} j_{\lfloor \beta (n^2 - n) \rfloor}}.
+\end{displaymath}
+%%
+Finally, it sorts the costs of assignments:
+%%
+\begin{displaymath}
+d_{k_1 l_1} f_{i_1 j_1},  d_{k_2 l_2} f_{i_2 j_2}, \ldots, d_{k_{\lfloor \beta (n^2 - n) \rfloor} l_{\lfloor \beta (n^2 - n) \rfloor}} f_{i_{\lfloor \beta (n^2 - n) \rfloor} j_{\lfloor \beta (n^2 - n) \rfloor}},
+\end{displaymath}
+%%
+keeping the $\lfloor \alpha \beta (n^2 - n) \rfloor$ smallest elements, where $0 < \alpha < 1$ is another restriction parameter. Note that $d_{k_1 l_1} f_{i_1 j_1}$ gives the cost of simultaneously assigning facility $i_1$ to location $k_1$ and facility $j_1$ to location $l_1$.
 
-GRASP with path-relinking (GRASP-PR)...
+The construction phase of GRASP consists of two stages. In the first stage, the algorithm makes a simultaneous assignment selected at random among those with the $\lfloor \alpha \beta (n^2 - n) \rfloor$ smallest costs.
+
+In the second stage of the construction phase, GRASP build a feasible solution by making 
+a series of greedy assignments as follows. First, it computes the costs of all $m$ possible assignments with respect to assignments already made. Then, it randomly selects one assignment among those with $\lfloor \alpha m \rfloor$ smallest costs.
+
+In the local search phase, GRASP searches for a local optimum in the neighborhood of the constructed solution. Different search strategies and different definitions of the neighborhood can be used. One possible approach is to check every possible swap of assignments and make those which improve the current solution until no futher improvements can be made.
+
+GRASP repeats the construction and local search phases for a given number of times, keeping the best solution found. Each iteration is indenpendent in the sense that every construction phase builds a new solution from scratch. The best solutions are kept, but GRASP takes no advantage of the knowledge gained in previously iterations to build or impove a new solution. This is exactly where the concept of path-relinking comes into play.
+
+GRASP with path-relinking is an extension of the basic GRASP that uses an elite set $P$ to store the best solutions found. It also incorporates a third phase that consists of choosing at random one elite solution $q \in P$  to be combined with the last solution $p$ produced after the local search phase.
+
+Solutions $p$ and $q$ are combined as follows. For every location $k = 1, \ldots, n$, the path-relinking algorithm attempts to exchange facility $p_k$ assigned to location $k$ in  solution $p$ with facility $q_k$ assigned to location $k$ in the elite solution. In order to keep the solution $p$ feasible, it actually exchanges $p_k$ with $p_l$, where $p_l = q_k$. This exchange is performed only if it results in a better solution. The result of the path-relinking phase is a solution $r$ that is as good as $p$ and $q$.
+
+For more detail on GRASP with path-relinking, we refer the interested reader to~\citealp{OLIVEIRA04}.
 
 % ==============================================================================
 \section{Results And Discussion}
@@ -367,12 +424,7 @@ In terms of running time, the row-epitaxial is faster and shows little variation
 
 It is interesting to extrapolate the times shown on Table~\ref{tab:graspr_reptx} to predict the total time that would be required to design the layout of commercial microarrays, if we were to combine GRASP-PR with a partitioning algorithm. If the partitioning produced 6\,x\,6 regions, 37\,636 sub-regions would be created from the 1164\,x\,1164 Affymetrix Human Genome U133 Plus 2.0 GeneChip\raisebox{.6ex}{\scriptsize \textregistered}, one of the largest Affymetrix chips. Since each sub-region takes around 3 seconds to compute with GRASP-PR, the total time required for designing such a chip would be a little over 31 hours (ignoring the time for the partitioning itself).
 
-If the partitioning produced 12\,x\,12 regions, 9\,409 sub-regions would be created and, at 2.4 minutes each, the total time would be more than 16 days. This is probably prohibitive (and senseless since row-epitaxial is producing better layouts), although it is certainly possible to reduce the time of each GRASP-PR execution by running it on faster machines or using a parallel implementation (GRASP is known to be easily parallelized; see \citealp{LI94}). Figure~\ref{fig:time_extrapolation} shows similar predictions based on our results with varying chip dimensions and partitioning sizes.
-
-\begin{figure}
-%\centerline{\includegraphics{fig01.eps}}
-\caption{Predicted time to compute the layout of large microarrays using a partitioning algorithm and GRASP-PR on the resulting sub-regions. Each curve represents a chip with the dimension of an existing GeneChip array (example in parentheses). The maximum dimension of sub-regions produced by the partitioning is shown on the horizontal axis. The time required for the partitioning itself is ignored.}\label{fig:time_extrapolation}
-\end{figure}
+If the partitioning produced 12\,x\,12 regions, 9\,409 sub-regions would be created and, at 2.4 minutes each, the total time would be more than 16 days. This is probably prohibitive, although it is certainly possible to reduce the time of each GRASP-PR execution by running it on faster machines or using a parallel implementation (GRASP is known to be easily parallelized; see \citealp{LI94}). Figure~\ref{fig:time_extrapolation} shows similar predictions based on our results with varying chip dimensions and partitioning sizes.
 
 We believe that solution quality is more important than the running time of a placement algorithm. Even if an algorithm takes a couple of days to complete, it is time well spent given that commercial microarrays are likely to be produced in large scale. This is specially true when we consider the time required for the whole design process of a microarray chip. Even customer designed chips, that usually have a limited number of produced units, are likely to benefit from a few extra hours of computing time.
 
@@ -386,6 +438,11 @@ We conclude by noting that QAP heuristics such as GRASP-PR could also be used to
 The only problem with this approach is that the QAP heuristic also needs to take into account the conflicts due to the spots around the window. Otherwise, the new layout may increase the conflicts on the borders of the window.
 
 A possible solution to this problem is to solve a larger QAP instance consisting of the spots inside the window as well as those around it. The spots outside the window obviously must remain unchanged, and that can be done by fixing the corresponding elements of the permutation $\pi$. Note also that there is no need to compute $d_{ij}$ if spots $i$ and $j$ are both outside the window, nor $f_{ij}$ if probes $i$ and $j$ are assigned to spots outside the window.
+
+\begin{figure}
+{\footnotesize \centerline{\input{time_extrapolation}}}
+\caption{Predicted running times required to design selected Affymetrix GeneChip arrays using GRASP-PR and a partitioning algorithm with varying degrees of partitioning (based on data shown in Table~\ref{tab:graspr_reptx}). The dimensions of the chips are shown in parentheses. The time required for the partitioning itself is ignored.}\label{fig:time_extrapolation}
+\end{figure}
 
 % ==============================================================================
 \begin{thebibliography}{}
