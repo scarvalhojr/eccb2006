@@ -13,7 +13,7 @@
 \title{Microarray Layout as Quadratic Assignment Problem}
 \author[de Carvalho Jr. and Rahmann]{S\'ergio A. de Carvalho Jr.\,$^{\rm a,b,c}$ and Sven Rahmann\,$^{\rm b,c}$}
 \address{$^{\rm a}$Graduiertenkolleg Bioinformatik, Bielefeld University, Germany,\\
-  $^{\rm b}$International NRW Graduate School for Bioinformatics and Genome Research, Bielefeld University, Germany,\\
+  $^{\rm b}$International NRW Graduate School in Bioinformatics and Genome Research, Bielefeld University, Germany,\\
   $^{\rm c}$Algorithms and Statistics for Systems Biology group, Genome Informatics, Technische Fakult\"at, Bielefeld University, D-33594 Bielefeld, Germany.
 }
 \maketitle
@@ -53,8 +53,8 @@ Formally, we have a set of probes $\mathcal{P} = \{p_{1}, p_{2}, ... p_{n}\}$ th
 In general, a probe can be \emph{embedded} within $\mathcal{S}$ in several ways. An embedding of $p_{i}$ is a $\mu$-tuple $\varepsilon_{i} = (e_{i,1}, e_{i,2}, ... e_{i,\mu})$ in which $e_{i,k} = 1$ if probe $p_{i}$ receives nucleotide $t_{k}$ (at step~$k$), or 0 otherwise (Figure~\ref{fig:masking_process}).
 
 \begin{figure}
-% add figure
-\caption{Synthesis of a hypothetical 3\,x\,3 chip. a) Chip layout and 3-base-long probe sequences; b) deposition sequence and embeddings of the highlighted probes; c) the first three resulting photolithographic masks.}
+\centerline{\includegraphics[width=230pt]{chip}}
+\caption{Synthesis of a hypothetical 3\,x\,3 chip. On the top left, the chip layout and its 3-base-long probe sequences. On the top right, the deposition sequence and the probe embeddings. On the bottom, the first four resulting photolithographic masks.}
 \label{fig:masking_process}
 \end{figure}
 
@@ -62,7 +62,7 @@ Deposition sequences are usually cyclical, that is $\mathcal{S}$ is a repeated p
 
 Because of diffraction of light or internal reflection, untargeted spots can sometimes be accidentally activated in a certain masking step, producing unpredicted probes that can compromise the results of an experiment. This issue was described by \citet{FODOR91}, who noted that the problem is more likely to occur near the borders between masked and unmasked spots. This observation has given rise to the term \emph{border conflict}.
 
-We are interested in finding an arrangement of the probes on the chip together with their embeddings in such a way that we minimize the chances of unintended illumination during mask exposure steps. This problem appears to be hard (although the authors are not aware of an NP-hardness proof, and our QAP formulation has several special properties) because ofthe exponential number of possible arrangements, and optimal solutions are unlikely to be found even for very small chips and even if we consider the probes as having a single pre-defined embedding.
+We are interested in finding an arrangement of the probes on the chip together with their embeddings in such a way that we minimize the chances of unintended illumination during mask exposure steps. This problem appears to be hard (although the authors are not aware of an NP-hardness proof, and our QAP formulation has several special properties) because of the exponential number of possible arrangements, and optimal solutions are unlikely to be found even for very small chips and even if we consider the probes as having a single pre-defined embedding.
 
 If we consider all valid embeddings, the problem is even harder. A typical probe of an Affymetrix chip, for instance, can have up to several million possible embeddings. For this reason, the problem has been traditionally tackled in two phases. First, an initial embedding of the probes is fixed and an arrangement of these embeddings on the chip with minimum border conflicts is sought. This is usually refered to as the \emph{placement} problem. Second, a \emph{post-placement} optimization phase re-embeds the probes considering its location on the chip, in such a way that the conflicts with the neighboring spots are further reduced.
 
@@ -81,14 +81,14 @@ The \emph{border length}~$\mathcal{B}_k$ of a mask~$m_{k}$ is simply
 defined as the number of borders shared by masked and unmasked spots
 at masking step~$k$. The total border length of a given arrangement is
 the sum of border lengths over all masks. For example, in
-Figure~\ref{fig:masking_process}, the border length XXX.
+Figure~\ref{fig:masking_process}, the four masks shown have $\mathcal{B}_1 = 4$, $\mathcal{B}_2 = 6$, $\mathcal{B}_3 = 6$ and $\mathcal{B}_4 = 4$. The total border length of that arrangement is 50.
 
 % ------------------------------------------------------------------------------
 \subsection{Conflict Index}
 
 The border length of an individual mask measures the quality of that
-mask. However, we are more interested in the risk of a probe at a
-given spot of being faulty. That is, we need a per-spot measure
+mask. We are more interested in estimating the risk of synthesizing a faulty
+probe at a given spot. That is, we need a per-spot measure
 instead of a per-mask measure. Additionally, \citet{KAHNG03A} noted
 that the definition of border length does not take into account two
 simple yet important practical considerations:
