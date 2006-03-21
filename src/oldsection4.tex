@@ -1,0 +1,149 @@
+
+\ignore{
+For Border Length Minimization, the definition is again simple: We set
+\begin{equation}
+  d_{kl} := \frac{h(p_k, p_l)}{2},
+\end{equation}
+where $h(p_k, p_l)$ is the Hamming distance between the embeddings of probes
+$p_k$ and $p_l$. We divide it by 2 for cosmetical reasons only: in
+(\ref{eq:qap_def}), the conflicts between $p_k$ and $p_l$ appear twice (in
+$d_{kl}$ and $d_{lk}$).
+
+For conflict index minimization, the differences in the embeddings must be
+weighted according to the number of nucleotides already used.
+}
+
+
+
+With these definitions in place, we show that the objective
+function~(\ref{eq:qap_def}) is equal to the total conflict index
+$\sum_i \mathcal{C}(i)$:
+
+
+
+\ignore{
+\subsubsection{Border Length Minimization}
+
+The QAP formulation for the case of border length minimization is trivial. We set
+%%
+\begin{equation}
+f_{ij} := \frac{h(p_i, p_j)}{2}
+\end{equation}
+%%
+where $h(p_i, p_j)$ is the Hamming distance between the embeddings of probes $p_i$ and $p_j$. We divide it by since, in (\ref{eq:qap_def}), the conflicts between $p_i$ and $p_j$ appears twice (in $f_{ij}$ and $f_{ji}$). For the distance matrix, we set
+%%
+\begin{equation}
+d_{ij} :=
+        \left\{
+                \begin{array}{ll}
+                        1 & \mbox{if spots $i$ and $j$ are adjacent}, \\
+                        0 & \mbox{otherwise}, \\
+                \end{array}
+        \right.
+\end{equation}
+%%
+since only conflicts between adjacent spots are relevant for the border length. It is easy to verify that this formulation reflects the definition of border length.
+
+\subsubsection{Conflict Index Minimization}
+
+In case of conflict index minimization, the formulation is slightly more elaborate. Our goal is to design a microarray minimizing the sum of conflict indices over all spots $i$, that is
+%%
+\begin{equation}
+\label{eq:ci_min}
+\sum_{i} \mathcal{C}(i).
+\end{equation}
+
+From the point of view of a spot~$i$, there is a conflict at step~$k$ only when $i$ is masked and a close neighbor~$j$ is unmasked, in which case we say that there is an induced conflict of~$j$ onto~$i$, $\mathcal{C}_{j}(i)$, that can be derived from Equation (\ref{eq:conf_idx}) as
+%%
+\begin{equation}
+\label{eq:induced_conf_idx}
+\mathcal{C}_{j}(i) := \sum_{k=1}^{\mu} \omega(i,k) \cdot \delta(i,j,k).
+\end{equation}
+
+We can then rewrite (\ref{eq:conf_idx}) as
+%%
+\begin{equation}
+\mathcal{C}(i) := \sum_{j} \mathcal{C}_{j}(i),
+\end{equation}
+%%
+and our objective function (\ref{eq:ci_min}) turns into
+%%
+\begin{equation}
+\label{eq:ci_min_qap}
+\sum_{i} \sum_{j} \mathcal{C}_{j}(i),
+\end{equation}
+%%
+where $j$ ranges over all neighbors that are at most three spots away from $i$.
+
+Note the similarities between (\ref{eq:qap_def}) and (\ref{eq:ci_min_qap}). Now we need to set $f_{ij}$ and $d_{ij}$ in such a way that their multiplication results in $\mathcal{C}_{j}(i)$. The dependence of $\delta$ on $k$ is due to the fact that $\delta(i,j,k) = 0$ if spot~$j$ is masked at step $k$. It is thus possible to rewrite Equation (\ref{eq:induced_conf_idx}) as
+%%
+\begin{equation}
+\label{eq:induced_conf_idx_2}
+\mathcal{C}_{j}(i) := \left( \sum_{k=1}^{\mu} \omega(i,k) \cdot \phi(j,k) \right) \cdot (d(i,j))^{-2},
+\end{equation}
+%%
+where
+%%
+\begin{equation}
+\phi(j,k) :=
+        \left\{
+                \begin{array}{ll}
+                        0 & \mbox{if spot $j$ is masked at step $k$}, \\
+                        1 & \mbox{otherwise}, \\
+                \end{array}
+        \right.
+\end{equation}
+%%
+and $d(i,j)$ is the Euclidean distance between spots~$i$ and~$j$ as used in (\ref{eq:dist_weight}).
+
+Equation (\ref{eq:induced_conf_idx_2}) suggests how $f_{ij}$ and $d_{ij}$ can be set to produce $\mathcal{C}_j(i)$. The latter is trivial:
+%%
+\begin{equation}
+d_{ij} :=
+        \left\{
+                \begin{array}{ll}
+                        (d(i,j))^{-2} & \mbox{if spot $j$ is ``near'' spot $i$}, \\
+                        0 & \mbox{otherwise}. \\
+                \end{array}
+        \right.
+\end{equation}
+%%
+where ``near'' means that spot~$j$ is at most three cells away from~$i$. This definition also accounts for the difference in range of $j$ in (\ref{eq:qap_def}) and (\ref{eq:ci_min_qap}).
+
+The only remaining problem is that $\mathcal{C}_j(i)$ is defined in terms of spots $i$ and $j$, whereas $f_{ij}$ must be defined in terms of probes $i$ and $j$, independently of which spots they are assigned to. However, the dependence of~$\omega$ and~$\phi$ on the spots is a mere convenience since the exact location of the spots is irrelevant. The embeddings of their probes is what matters. Hence, we set
+%%
+\begin{equation}
+f_{ij} := \sum_{k=1}^{\mu} \omega'(i,k) \cdot \phi'(j,k),
+\end{equation}
+%%
+where
+%%
+\begin{align}
+\omega'(i,k) &:=
+        \left\{
+                \begin{array}{ll}
+                        c \cdot \exp{\left(\theta \cdot \lambda'(i,k)\right)} &
+                            \mbox{if embedding of $i$} \\
+                          & \mbox{is masked at step $k$}, \\
+                        0 & \mbox{otherwise}, \\
+                \end{array}
+        \right. \\
+\lambda'(i,k) &:= 1 + \min(b'_{i,k},\ell'_{i} - b'_{i,k}), \\
+\phi'(j,k) &:=
+        \left\{
+                \begin{array}{ll}
+                        0 & \mbox{if embedding of $j$ is masked at step $k$} \\
+                        1 & \mbox{otherwise}, \\
+                \end{array}
+        \right.
+\end{align}
+%%
+$c$ and $\theta$ are constants, $\ell'_i$ is the length of probe $i$, and $b'_{i,k}$ denotes the number of nucleotides of probe~$i$ synthesized up to and including step~$k$.
+
+}
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "eccb2006"
+%%% End: 
