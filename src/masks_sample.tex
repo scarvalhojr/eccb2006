@@ -1,0 +1,61 @@
+\begin{picture}(240,90)
+\footnotesize{
+\put(0,0){\dashbox{1}(240,90){}}
+\newsavebox{\maskedspot}
+\newsavebox{\unmaskedspot}
+\savebox{\maskedspot}(24,24){M}
+\savebox{\unmaskedspot}(24,24){U}
+\put(-4,-1){
+	\begin{picture}(240,90)
+	\put(38,9){\makebox(0,0){$k = 1$}}
+	\put(0,18){
+		%% first mask
+		\begin{picture}(72,72)
+		\put(0,0){\thicklines \framebox(72,72){}}
+		\put(0,0){\frame{\usebox{\maskedspot}}}
+		\put(0,24){\frame{\usebox{\unmaskedspot}}}
+		\put(0,48){\frame{\usebox{\maskedspot}}}
+		\put(24,0){\frame{\usebox{\maskedspot}}}
+		\put(24,24){\frame{\usebox{\unmaskedspot}}}
+		\put(24,48){\frame{\usebox{\maskedspot}}}
+		\put(48,0){\frame{\usebox{\maskedspot}}}
+		\put(48,24){\frame{\usebox{\unmaskedspot}}}
+		\put(48,48){\frame{\usebox{\maskedspot}}}
+		\end{picture}
+	}
+	\put(122,9){\makebox(0,0){$k = 2$}}
+	\put(84,18){
+		%% second mask
+		\begin{picture}(72,72)
+		\put(0,0){\thicklines \framebox(72,72){}}
+		\put(0,0){\frame{\usebox{\maskedspot}}}
+		\put(0,24){\frame{\usebox{\unmaskedspot}}}
+		\put(0,48){\frame{\usebox{\maskedspot}}}
+		\put(24,0){\frame{\usebox{\maskedspot}}}
+		\put(24,24){\frame{\usebox{\unmaskedspot}}}
+		\put(24,48){\frame{\usebox{\maskedspot}}}
+		\put(48,0){\frame{\usebox{\maskedspot}}}
+		\put(48,24){\frame{\usebox{\unmaskedspot}}}
+		\put(48,48){\frame{\usebox{\maskedspot}}}
+		\end{picture}
+	}
+	\put(206,9){\makebox(0,0){$k = 3$}}
+	\put(168,18){
+		%% second mask
+		\begin{picture}(72,72)
+		\put(0,0){\thicklines \framebox(72,72){}}
+		\put(0,0){\frame{\usebox{\maskedspot}}}
+		\put(0,24){\frame{\usebox{\unmaskedspot}}}
+		\put(0,48){\frame{\usebox{\maskedspot}}}
+		\put(24,0){\frame{\usebox{\maskedspot}}}
+		\put(24,24){\frame{\usebox{\unmaskedspot}}}
+		\put(24,48){\frame{\usebox{\maskedspot}}}
+		\put(48,0){\frame{\usebox{\maskedspot}}}
+		\put(48,24){\frame{\usebox{\unmaskedspot}}}
+		\put(48,48){\frame{\usebox{\maskedspot}}}
+		\end{picture}
+	}
+	\end{picture}
+}
+}
+\end{picture}
